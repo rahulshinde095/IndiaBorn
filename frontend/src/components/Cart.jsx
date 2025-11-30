@@ -1,4 +1,4 @@
-import { useCart } from '../hooks/useCart'
+import { useCart } from '../context/CartContext'
 import { formatCurrency } from '../utils/format'
 import './Cart.css'
 

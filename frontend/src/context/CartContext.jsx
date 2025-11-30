@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react'
+import { createContext, useContext, useState, useEffect } from 'react'
+
+const CartContext = createContext()
 
 const STORAGE_KEY = 'indiaborn-cart'
 
-export function useCart() {
+export function CartProvider({ children }) {
   const [cart, setCart] = useState(() => {
     const stored = localStorage.getItem(STORAGE_KEY)
     return stored ? JSON.parse(stored) : []
@@ -13,25 +15,27 @@ export function useCart() {
   }, [cart])
 
   const addToCart = (product) => {
-    console.log('Adding to cart:', product);
+    console.log('Adding to cart:', product)
     setCart(prev => {
       const existing = prev.find(item => item.productId === product.id)
       if (existing) {
-        console.log('Product already in cart, increasing quantity');
+        console.log('Product already in cart, increasing quantity')
         return prev.map(item =>
           item.productId === product.id
             ? { ...item, quantity: item.quantity + 1 }
             : item
         )
       }
-      console.log('Adding new product to cart');
-      return [...prev, {
+      console.log('Adding new product to cart')
+      const newCart = [...prev, {
         productId: product.id,
         name: product.name,
         price: product.salePrice ?? product.price,
         quantity: 1,
         image: product.images?.[0]?.url,
       }]
+      console.log('New cart:', newCart)
+      return newCart
     })
   }
 
@@ -48,7 +52,7 @@ export function useCart() {
   const taxes = subtotal * 0.05
   const total = subtotal + taxes
 
-  return {
+  const value = {
     cart,
     cartCount,
     subtotal,
@@ -58,5 +62,14 @@ export function useCart() {
     removeFromCart,
     clearCart,
   }
+
+  return <CartContext.Provider value={value}>{children}</CartContext.Provider>
 }
 
+export function useCart() {
+  const context = useContext(CartContext)
+  if (!context) {
+    throw new Error('useCart must be used within CartProvider')
+  }
+  return context
+}

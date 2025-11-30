@@ -63,6 +63,25 @@ public class OrdersController : ControllerBase
         return order is null ? NotFound() : order;
     }
 
+    [HttpPost("test")]
+    public async Task<ActionResult<Order>> CreateTestOrder(CreateOrderRequest request, CancellationToken token)
+    {
+        try
+        {
+            // Demo mode - create order without payment
+            var userId = User?.Identity?.IsAuthenticated == true ? User.FindFirst("sub")?.Value : null;
+            var order = await _orderService.CreateTestOrderAsync(request, userId, token);
+            
+            return CreatedAtAction(nameof(GetOrderById), new { id = order.Id }, order);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Test order error: {ex.Message}");
+            Console.WriteLine($"Stack trace: {ex.StackTrace}");
+            return StatusCode(500, new { message = ex.Message, details = ex.InnerException?.Message });
+        }
+    }
+
     [Authorize(Roles = nameof(UserRole.Admin))]
     [HttpPatch("{id}/status")]
     public async Task<ActionResult<Order>> UpdateStatus(string id, [FromQuery] OrderStatus status, CancellationToken token)
@@ -75,5 +94,24 @@ public class OrdersController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<List<Order>>> GetOrders(CancellationToken token)
         => await _orderService.GetAllAsync(token);
+
+    [HttpGet("{id}/invoice")]
+    public async Task<IActionResult> DownloadInvoice(string id, CancellationToken token)
+    {
+        var order = await _orderService.GetByIdAsync(id, token);
+        if (order is null) return NotFound("Order not found");
+        
+        if (string.IsNullOrEmpty(order.InvoiceUrl))
+            return NotFound("Invoice not generated for this order");
+
+        var invoiceFileName = Path.GetFileName(order.InvoiceUrl);
+        var invoicePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "invoices", invoiceFileName);
+        
+        if (!System.IO.File.Exists(invoicePath))
+            return NotFound("Invoice file not found");
+
+        var fileBytes = await System.IO.File.ReadAllBytesAsync(invoicePath, token);
+        return File(fileBytes, "application/pdf", invoiceFileName);
+    }
 }
 

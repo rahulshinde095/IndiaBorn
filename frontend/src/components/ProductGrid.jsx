@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { productApi } from '../services/api'
-import { useCart } from '../hooks/useCart'
+import { useCart } from '../context/CartContext'
 import { formatCurrency } from '../utils/format'
 import './ProductGrid.css'
 
@@ -19,11 +19,43 @@ export default function ProductGrid() {
   const [products, setProducts] = useState([])
   const [filteredProducts, setFilteredProducts] = useState([])
   const [priceRange, setPriceRange] = useState('all')
+  const [imageErrors, setImageErrors] = useState({})
+  const [imageLoading, setImageLoading] = useState({})
+  const [expandedDescriptions, setExpandedDescriptions] = useState({})
   const { addToCart } = useCart()
 
   useEffect(() => {
     productApi.getAll().then(setProducts)
   }, [])
+
+  const getImageUrl = (product) => {
+    let imageUrl = product.images?.find(i => i.isPrimary)?.url ||
+      product.images?.[0]?.url ||
+      '/assets/brand-logo.jpeg'
+    
+    if (imageUrl.startsWith('/')) {
+      imageUrl = `http://localhost:5184${imageUrl}`
+    }
+    
+    return imageUrl
+  }
+
+  const handleImageLoad = (productId) => {
+    setImageLoading(prev => ({ ...prev, [productId]: false }))
+  }
+
+  const handleImageError = (productId) => {
+    console.error(`Failed to load image for product ${productId}`)
+    setImageErrors(prev => ({ ...prev, [productId]: true }))
+    setImageLoading(prev => ({ ...prev, [productId]: false }))
+  }
+
+  const toggleDescription = (productId) => {
+    setExpandedDescriptions(prev => ({
+      ...prev,
+      [productId]: !prev[productId]
+    }))
+  }
 
   useEffect(() => {
     const searchLower = (searchQuery || '').trim().toLowerCase()
@@ -41,7 +73,13 @@ export default function ProductGrid() {
       return matchesSearch && matchesRange
     })
 
-    setFilteredProducts(filtered)
+    // Add consistent review count to each product
+    const filteredWithReviews = filtered.map(product => ({
+      ...product,
+      reviewCount: product.reviewCount || Math.floor(Math.random() * 500) + 10
+    }))
+
+    setFilteredProducts(filteredWithReviews)
   }, [products, searchQuery, priceRange])
 
   return (
@@ -81,10 +119,9 @@ export default function ProductGrid() {
             const current = Number(product.salePrice ?? product.price)
             const hasDiscount = product.salePrice !== null && product.salePrice !== undefined && current < original
             const discountPercent = hasDiscount ? Math.round((1 - current / original) * 100) : null
-            const imageUrl =
-              product.images?.find(i => i.isPrimary)?.url ||
-              product.images?.[0]?.url ||
-              '/assets/brand-logo.jpeg'
+            
+            const imageUrl = getImageUrl(product)
+            const fallbackUrl = 'http://localhost:5184/assets/brand-logo.jpeg'
 
             return (
               <article key={product.id} className="product product--amazon">
@@ -92,7 +129,17 @@ export default function ProductGrid() {
                   {product.isOnSale && <span className="product__deal-badge">Deal</span>}
                   {product.isBestSeller && <span className="product__best-seller">Best Seller</span>}
                   {product.isNewArrival && <span className="product__new-badge">New</span>}
-                  <img src={imageUrl} alt={product.name} className="product__image" />
+                  {imageLoading[product.id] && (
+                    <div className="image-loading">Loading...</div>
+                  )}
+                  <img 
+                    src={imageErrors[product.id] ? fallbackUrl : imageUrl}
+                    alt={product.name} 
+                    className="product__image"
+                    onLoad={() => handleImageLoad(product.id)}
+                    onError={() => handleImageError(product.id)}
+                    style={{ display: imageLoading[product.id] ? 'none' : 'block' }}
+                  />
                   <button
                     className="product__add-btn"
                     onClick={() => addToCart(product)}
@@ -105,7 +152,7 @@ export default function ProductGrid() {
                   <h3 className="product__title">{product.name}</h3>
                   <div className="product__rating">
                     <span className="stars">★★★★★</span>
-                    <span className="rating-count">({Math.floor(Math.random() * 500) + 10})</span>
+                    <span className="rating-count">({product.reviewCount})</span>
                   </div>
                   <div className="product__pricing">
                     <span className="price-current">{formatCurrency(current)}</span>
@@ -120,9 +167,25 @@ export default function ProductGrid() {
                   {product.isNewArrival && !hasDiscount && (
                     <p className="deal-label deal-label--soft">New arrival</p>
                   )}
-                  <p className="product__description">
-                    {product.description.substring(0, 80)}...
-                  </p>
+                  <div className="product__description-wrapper">
+                    <p className="product__description">
+                      {expandedDescriptions[product.id] 
+                        ? product.description
+                        : product.description.length > 120
+                        ? `${product.description.substring(0, 120)}...`
+                        : product.description
+                      }
+                    </p>
+                    {product.description.length > 120 && (
+                      <button 
+                        className="view-more-btn"
+                        onClick={() => toggleDescription(product.id)}
+                        type="button"
+                      >
+                        {expandedDescriptions[product.id] ? 'View less' : 'View more'}
+                      </button>
+                    )}
+                  </div>
                   <p className="product__shipping">FREE delivery</p>
                 </div>
               </article>

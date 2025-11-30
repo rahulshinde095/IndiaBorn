@@ -1,11 +1,14 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useCart } from '../hooks/useCart'
+import { useCart } from '../context/CartContext'
 import './Header.css'
 
 export default function Header({ onSearch }) {
   const { cartCount } = useCart()
   const [searchValue, setSearchValue] = useState('')
+  const [showPinModal, setShowPinModal] = useState(false)
+  const [pinCode, setPinCode] = useState('')
+  const [pinMessage, setPinMessage] = useState('')
 
   const handleSearch = (e) => {
     e.preventDefault()
@@ -17,6 +20,24 @@ export default function Header({ onSearch }) {
     if (productsSection) {
       productsSection.scrollIntoView({ behavior: 'smooth' })
     }
+  }
+
+  const handleCheckPin = () => {
+    if (!pinCode || pinCode.length !== 6) {
+      setPinMessage('Please enter a valid 6-digit pin code')
+      return
+    }
+    
+    // Simulate pin code check
+    const deliveryDays = Math.floor(Math.random() * 3) + 2 // 2-4 days
+    setPinMessage(`✓ Delivery available in ${deliveryDays} days for pin code ${pinCode}`)
+    
+    // Auto close after 3 seconds
+    setTimeout(() => {
+      setShowPinModal(false)
+      setPinCode('')
+      setPinMessage('')
+    }, 3000)
   }
 
   return (
@@ -83,8 +104,59 @@ export default function Header({ onSearch }) {
 
       <div className="nav__location">
         <span>Delivering pan-India from Pimple Gurav, Pune</span>
-        <button type="button">Check pin code</button>
+        <button type="button" onClick={() => setShowPinModal(true)}>Check pin code</button>
       </div>
+
+      {showPinModal && (
+        <div className="pin-modal-overlay" onClick={() => setShowPinModal(false)}>
+          <div className="pin-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="pin-modal-header">
+              <h3>Check Delivery Availability</h3>
+              <button 
+                className="pin-modal-close" 
+                onClick={() => setShowPinModal(false)}
+                aria-label="Close"
+              >
+                ×
+              </button>
+            </div>
+            <div className="pin-modal-body">
+              <label htmlFor="pinCodeInput">Enter your pin code:</label>
+              <div className="pin-input-group">
+                <input
+                  id="pinCodeInput"
+                  type="text"
+                  placeholder="e.g., 411027"
+                  maxLength="6"
+                  value={pinCode}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, '')
+                    setPinCode(value)
+                    setPinMessage('')
+                  }}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      handleCheckPin()
+                    }
+                  }}
+                />
+                <button 
+                  type="button" 
+                  className="pin-check-btn"
+                  onClick={handleCheckPin}
+                >
+                  Check
+                </button>
+              </div>
+              {pinMessage && (
+                <p className={`pin-message ${pinMessage.includes('✓') ? 'success' : 'error'}`}>
+                  {pinMessage}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   )
 }

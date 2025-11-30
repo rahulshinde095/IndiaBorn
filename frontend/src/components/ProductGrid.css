@@ -1,1 +1,22 @@
-/* ProductGrid-specific styles if needed */
+/* ProductGrid-specific styles */
+
+.product__image-wrapper {
+  position: relative;
+}
+
+.image-loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #666;
+  font-size: 0.9rem;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  z-index: 1;
+}
+
+.product__image {
+  transition: opacity 0.3s ease;
+}

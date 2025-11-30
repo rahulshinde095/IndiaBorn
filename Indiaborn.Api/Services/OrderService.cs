@@ -101,6 +101,68 @@ public class OrderService
         };
     }
 
+    public async Task<Order> CreateTestOrderAsync(CreateOrderRequest request, string? userId, CancellationToken token = default)
+    {
+        var productMap = await _productService.GetByIdsAsync(request.Items.Select(i => i.ProductId), token);
+        var items = new List<OrderItem>();
+        decimal subtotal = 0;
+
+        foreach (var item in request.Items)
+        {
+            if (!productMap.TryGetValue(item.ProductId, out var product))
+            {
+                throw new InvalidOperationException($"Product {item.ProductId} not found.");
+            }
+
+            if (product.InventoryCount < item.Quantity)
+            {
+                throw new InvalidOperationException($"Not enough inventory for {product.Name}.");
+            }
+
+            var price = product.IsOnSale && product.SalePrice.HasValue ? product.SalePrice.Value : product.Price;
+            items.Add(new OrderItem
+            {
+                ProductId = product.Id,
+                Name = product.Name,
+                Quantity = item.Quantity,
+                UnitPrice = price,
+                ImageUrl = product.Images.FirstOrDefault(i => i.IsPrimary)?.Url ?? product.Images.FirstOrDefault()?.Url
+            });
+
+            subtotal += item.Quantity * price;
+        }
+
+        var order = new Order
+        {
+            UserId = userId ?? string.Empty,
+            ReferenceCode = $"IB-{DateTime.UtcNow:yyyyMMddHHmmss}",
+            Items = items,
+            Shipping = request.Shipping,
+            Contact = new ContactInfo
+            {
+                Email = request.Email,
+                PhoneNumber = request.PhoneNumber,
+                WhatsAppNumber = request.WhatsAppNumber,
+                MessengerId = request.MessengerId
+            },
+            Subtotal = subtotal,
+            ShippingFee = request.ShippingFee,
+            Taxes = request.Taxes,
+            Status = OrderStatus.Paid,
+            PaymentStatus = PaymentStatus.Captured,
+            PaymentIntentId = $"test_{Guid.NewGuid():N}",
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
+        // Generate invoice (skip notifications for test orders)
+        order.InvoiceUrl = await _invoiceService.GenerateInvoiceAsync(order, token);
+        
+        await _orders.InsertOneAsync(order, cancellationToken: token);
+        
+        return order;
+    }
+
     public async Task<Order?> GetByPaymentIntentAsync(string paymentIntentId, CancellationToken token = default)
         => await _orders.Find(o => o.PaymentIntentId == paymentIntentId).FirstOrDefaultAsync(token);
 

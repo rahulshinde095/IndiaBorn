@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { authApi, productApi, adminApi, uploadApi } from '../services/api'
 import './Admin.css'
 
@@ -27,6 +28,8 @@ export default function Admin() {
     isOnSale: false,
   })
   const [imageFile, setImageFile] = useState(null)
+  const [uploadingImage, setUploadingImage] = useState(false)
+  const [uploadedImageUrl, setUploadedImageUrl] = useState('')
 
   useEffect(() => {
     if (token) {
@@ -88,29 +91,35 @@ export default function Admin() {
     })
   }
 
-  const handleUploadImage = async () => {
-    if (!imageFile) {
-      setProductMessage('Please select an image file.')
-      return
-    }
-    if (!token) {
-      setProductMessage('Please log in first.')
-      return
-    }
+  const handleFileSelect = async (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+
+    console.log('File selected:', file.name, 'Size:', file.size)
+    setImageFile(file)
+    setUploadingImage(true)
+    setProductMessage(`Uploading ${file.name}...`)
 
     try {
-      setProductMessage('Uploading image...')
-      const result = await uploadApi.uploadImage(imageFile, token)
+      const result = await uploadApi.uploadImage(file, token)
+      console.log('Upload successful:', result.url)
+      
+      setUploadedImageUrl(result.url)
       setFormData(prev => ({ ...prev, imageUrl: result.url }))
-      setProductMessage('Image uploaded successfully!')
-      setImageFile(null)
+      setProductMessage(`✓ ${file.name} uploaded successfully!`)
     } catch (error) {
-      setProductMessage(`Upload error: ${error.message}`)
+      console.error('Upload failed:', error)
+      setImageFile(null)
+      setUploadedImageUrl('')
+      setProductMessage(`Failed to upload: ${error.message}`)
+    } finally {
+      setUploadingImage(false)
     }
   }
 
   const handleEditProduct = (product) => {
     setEditingProduct(product.id)
+    const existingImageUrl = product.images?.[0]?.url || ''
     setFormData({
       name: product.name,
       description: product.description,
@@ -118,11 +127,12 @@ export default function Admin() {
       salePrice: product.salePrice?.toString() || '',
       inventory: product.inventoryCount.toString(),
       category: product.category || '',
-      imageUrl: product.images?.[0]?.url || '',
+      imageUrl: existingImageUrl,
       isBestSeller: product.isBestSeller || false,
       isNewArrival: product.isNewArrival || false,
       isOnSale: product.isOnSale || false,
     })
+    setUploadedImageUrl(existingImageUrl)
   }
 
   const handleDeleteProduct = async (id) => {
@@ -138,6 +148,12 @@ export default function Admin() {
 
   const handleSaveProduct = async (e) => {
     e.preventDefault()
+
+    if (!formData.imageUrl && !editingProduct) {
+      setProductMessage('Please select and wait for image upload to complete.')
+      return
+    }
+
     try {
       const data = {
         name: formData.name,
@@ -175,6 +191,7 @@ export default function Admin() {
       })
       setEditingProduct(null)
       setImageFile(null)
+      setUploadedImageUrl('')
       loadDashboard()
     } catch (error) {
       setProductMessage(`Error: ${error.message}`)
@@ -219,12 +236,19 @@ export default function Admin() {
     <div className="section admin">
       <header className="nav">
         <div className="nav__logo">
-          <img src="/assets/brand-logo.jpeg" alt="Indiaborn logo" />
-          <span>Indiaborn™ Admin</span>
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '1rem', textDecoration: 'none', color: 'inherit' }}>
+            <img src="/assets/brand-logo.jpeg" alt="Indiaborn logo" />
+            <span>Indiaborn™ Admin</span>
+          </Link>
         </div>
-        <button className="button button--ghost" onClick={handleLogout}>
-          Log out
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <Link to="/" className="button button--ghost" style={{ textDecoration: 'none' }}>
+            Back to Store
+          </Link>
+          <button className="button button--ghost" onClick={handleLogout}>
+            Log out
+          </button>
+        </div>
       </header>
 
       <section className="admin-grid">
@@ -317,18 +341,19 @@ export default function Admin() {
                 <input
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
-                  onChange={(e) => setImageFile(e.target.files[0])}
+                  onChange={handleFileSelect}
+                  disabled={uploadingImage}
                 />
-                <button
-                  type="button"
-                  className="button button--ghost"
-                  onClick={handleUploadImage}
-                >
-                  Upload Image
-                </button>
-                {formData.imageUrl && (
+                {uploadingImage && (
+                  <p className="upload-status uploading">⏳ Uploading image...</p>
+                )}
+                {formData.imageUrl && !uploadingImage && (
                   <div className="image-preview">
-                    <img src={formData.imageUrl} alt="Preview" />
+                    <img 
+                      src={formData.imageUrl.startsWith('/') ? `http://localhost:5184${formData.imageUrl}` : formData.imageUrl} 
+                      alt="Preview" 
+                    />
+                    <p className="upload-status success">✓ Image ready</p>
                   </div>
                 )}
               </div>

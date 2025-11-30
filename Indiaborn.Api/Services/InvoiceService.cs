@@ -24,19 +24,41 @@ public class InvoiceService
         var fileName = $"{order.ReferenceCode}.pdf";
         var filePath = Path.Combine(invoiceDir, fileName);
 
-        await Task.Run(() => BuildDocument(order).GeneratePdf(filePath), token);
+        // Load logo image if exists
+        byte[]? logoBytes = null;
+        var logoPath = Path.Combine(webRoot, "assets", "brand-logo.jpeg");
+        if (File.Exists(logoPath))
+        {
+            logoBytes = await File.ReadAllBytesAsync(logoPath, token);
+        }
+
+        await Task.Run(() => BuildDocument(order, logoBytes).GeneratePdf(filePath), token);
         return $"/invoices/{fileName}";
     }
 
-    private static Document BuildDocument(Order order)
+    private static Document BuildDocument(Order order, byte[]? logoBytes)
         => Document.Create(container =>
         {
             container.Page(page =>
             {
                 page.Margin(40);
-                page.Header()
-                    .Text("Indiaborn™")
-                    .SemiBold().FontSize(24).FontColor(Colors.Grey.Darken2);
+                
+                // Header with logo if available
+                page.Header().Row(row =>
+                {
+                    if (logoBytes != null)
+                    {
+                        row.ConstantItem(60).Image(logoBytes).FitWidth();
+                        row.RelativeItem().PaddingLeft(10).AlignMiddle()
+                            .Text("Indiaborn™")
+                            .SemiBold().FontSize(24).FontColor(Colors.Grey.Darken2);
+                    }
+                    else
+                    {
+                        row.RelativeItem().Text("Indiaborn™")
+                            .SemiBold().FontSize(24).FontColor(Colors.Grey.Darken2);
+                    }
+                });
 
                 page.Content().Column(column =>
                 {

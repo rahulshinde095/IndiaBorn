@@ -13,7 +13,18 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     })
-    if (!response.ok) throw new Error(`HTTP ${response.status}`)
+    if (!response.ok) {
+      const errorText = await response.text()
+      let errorData
+      try {
+        errorData = JSON.parse(errorText)
+      } catch {
+        errorData = { message: errorText }
+      }
+      const error = new Error(`HTTP ${response.status}`)
+      error.response = { data: errorData, status: response.status }
+      throw error
+    }
     const contentType = response.headers.get('content-type')
     if (contentType && contentType.includes('application/json')) {
       return response.json()
@@ -110,6 +121,7 @@ export const orderApi = {
   create: (data) => api.post('/orders', data),
   getHistory: (email) => api.get(`/orders/history?email=${encodeURIComponent(email)}`),
   confirm: (data) => api.post('/orders/confirm', data),
+  createTest: (data) => api.post('/orders/test', data),
 }
 
 export const authApi = {
