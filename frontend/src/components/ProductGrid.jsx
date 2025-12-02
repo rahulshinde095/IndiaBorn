@@ -16,15 +16,15 @@ const priceRanges = {
 
 export default function ProductGrid({ categoryFilter = null, subcategoryFilter = null }) {
   const outletContext = useOutletContext() || {}
-  const { searchQuery, categoryFilter: contextCategoryFilter, subcategoryFilter: contextSubcategoryFilter } = outletContext
+  const { searchQuery, categoryFilter: contextCategoryFilter, subcategoryFilter: contextSubcategoryFilter, priceFilter } = outletContext
   
   // Use props if provided, otherwise use context (for flexibility)
   const activeCategoryFilter = categoryFilter || contextCategoryFilter || null
   const activeSubcategoryFilter = subcategoryFilter || contextSubcategoryFilter || null
+  const priceRange = priceFilter || 'all'
   
   const [products, setProducts] = useState([])
   const [filteredProducts, setFilteredProducts] = useState([])
-  const [priceRange, setPriceRange] = useState('all')
   const [imageErrors, setImageErrors] = useState({})
   const [imageLoading, setImageLoading] = useState({})
   const [expandedDescriptions, setExpandedDescriptions] = useState({})
@@ -143,27 +143,6 @@ export default function ProductGrid({ categoryFilter = null, subcategoryFilter =
             </button>
           </div>
         )}
-        <div className="price-filters" id="priceFilters">
-          <span>Shop by price:</span>
-          <div className="price-filters__chips">
-            {Object.keys(priceRanges).map(range => (
-              <button
-                key={range}
-                type="button"
-                data-range={range}
-                className={`chip ${priceRange === range ? 'chip--active' : ''}`}
-                onClick={() => setPriceRange(range)}
-              >
-                {range === 'all' ? 'All' :
-                 range === 'under-299' ? 'Under ₹299' :
-                 range === '300-599' ? '₹300 - ₹599' :
-                 range === '600-999' ? '₹600 - ₹999' :
-                 range === '1000-1999' ? '₹1,000 - ₹1,999' :
-                 '₹2,000+'}
-              </button>
-            ))}
-          </div>
-        </div>
       </div>
       <div className="product-grid">
         {filteredProducts.length === 0 ? (

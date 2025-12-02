@@ -7,6 +7,7 @@ export default function Layout() {
   const [searchQuery, setSearchQuery] = useState('')
   const [categoryFilter, setCategoryFilter] = useState(null)
   const [subcategoryFilter, setSubcategoryFilter] = useState(null)
+  const [priceFilter, setPriceFilter] = useState('all')
 
   const handleCategoryFilter = (category, subcategory = null) => {
     setCategoryFilter(category)
@@ -15,9 +16,13 @@ export default function Layout() {
 
   return (
     <div>
-      <Header onSearch={setSearchQuery} onCategoryFilter={handleCategoryFilter} />
+      <Header 
+        onSearch={setSearchQuery} 
+        onCategoryFilter={handleCategoryFilter}
+        onPriceFilter={setPriceFilter}
+      />
       <main>
-        <Outlet context={{ searchQuery, categoryFilter, subcategoryFilter }} />
+        <Outlet context={{ searchQuery, categoryFilter, subcategoryFilter, priceFilter }} />
       </main>
       <Footer />
     </div>

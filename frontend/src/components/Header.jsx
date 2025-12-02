@@ -3,13 +3,15 @@ import { Link } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 import './Header.css'
 
-export default function Header({ onSearch, onCategoryFilter }) {
+export default function Header({ onSearch, onCategoryFilter, onPriceFilter }) {
   const { cartCount } = useCart()
   const [searchValue, setSearchValue] = useState('')
   const [showPinModal, setShowPinModal] = useState(false)
   const [pinCode, setPinCode] = useState('')
   const [pinMessage, setPinMessage] = useState('')
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false)
+  const [showPriceDropdown, setShowPriceDropdown] = useState(false)
+  const [selectedPrice, setSelectedPrice] = useState('all')
 
   const handleCategoryClick = (category, subcategory = null) => {
     setShowCategoryDropdown(false)
@@ -54,13 +56,9 @@ export default function Header({ onSearch, onCategoryFilter }) {
   }
 
   return (
-    <header className="nav nav--stacked">
+    <>
+      <header className="nav nav--stacked">
       <div className="nav__top">
-        <button className="icon-button" aria-label="Open menu">
-          <span className="icon-button__bar"></span>
-          <span className="icon-button__bar"></span>
-          <span className="icon-button__bar"></span>
-        </button>
         <Link to="/" className="nav__logo" style={{ textDecoration: 'none', color: 'inherit' }}>
           <img src="/assets/brand-logo.jpeg" alt="Indiaborn logo" />
           <div>
@@ -155,6 +153,49 @@ export default function Header({ onSearch, onCategoryFilter }) {
               </div>
             )}
           </div>
+          <div className="category-dropdown">
+            <button 
+              type="button"
+              className="category-dropdown-btn"
+              onClick={() => setShowPriceDropdown(!showPriceDropdown)}
+            >
+              Price ▾
+            </button>
+            {showPriceDropdown && (
+              <div className="category-dropdown-menu">
+                <a href="#collections" onClick={() => {
+                  setSelectedPrice('all');
+                  setShowPriceDropdown(false);
+                  if (onPriceFilter) onPriceFilter('all');
+                }}>All</a>
+                <a href="#collections" onClick={() => {
+                  setSelectedPrice('under-299');
+                  setShowPriceDropdown(false);
+                  if (onPriceFilter) onPriceFilter('under-299');
+                }}>Under ₹299</a>
+                <a href="#collections" onClick={() => {
+                  setSelectedPrice('300-599');
+                  setShowPriceDropdown(false);
+                  if (onPriceFilter) onPriceFilter('300-599');
+                }}>₹300 - ₹599</a>
+                <a href="#collections" onClick={() => {
+                  setSelectedPrice('600-999');
+                  setShowPriceDropdown(false);
+                  if (onPriceFilter) onPriceFilter('600-999');
+                }}>₹600 - ₹999</a>
+                <a href="#collections" onClick={() => {
+                  setSelectedPrice('1000-1999');
+                  setShowPriceDropdown(false);
+                  if (onPriceFilter) onPriceFilter('1000-1999');
+                }}>₹1,000 - ₹1,999</a>
+                <a href="#collections" onClick={() => {
+                  setSelectedPrice('2000-plus');
+                  setShowPriceDropdown(false);
+                  if (onPriceFilter) onPriceFilter('2000-plus');
+                }}>₹2,000+</a>
+              </div>
+            )}
+          </div>
           <a href="#collections">Deals</a>
           <Link to="/admin">Sell</Link>
           <a href="#story">Story</a>
@@ -218,6 +259,7 @@ export default function Header({ onSearch, onCategoryFilter }) {
         </div>
       )}
     </header>
+    </>
   )
 }
 
