@@ -3,13 +3,27 @@ import { Link } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 import './Header.css'
 
-export default function Header({ onSearch }) {
+export default function Header({ onSearch, onCategoryFilter, onPriceFilter }) {
   const { cartCount } = useCart()
   const [searchValue, setSearchValue] = useState('')
   const [showPinModal, setShowPinModal] = useState(false)
   const [pinCode, setPinCode] = useState('')
   const [pinMessage, setPinMessage] = useState('')
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false)
+  const [showPriceDropdown, setShowPriceDropdown] = useState(false)
+  const [selectedPrice, setSelectedPrice] = useState('all')
+
+  const handleCategoryClick = (category, subcategory = null) => {
+    setShowCategoryDropdown(false)
+    if (onCategoryFilter) {
+      onCategoryFilter(category, subcategory)
+    }
+    // Scroll to products section
+    const productsSection = document.getElementById('collections')
+    if (productsSection) {
+      productsSection.scrollIntoView({ behavior: 'smooth' })
+    }
+  }
 
   const handleSearch = (e) => {
     e.preventDefault()
@@ -42,13 +56,9 @@ export default function Header({ onSearch }) {
   }
 
   return (
-    <header className="nav nav--stacked">
+    <>
+      <header className="nav nav--stacked">
       <div className="nav__top">
-        <button className="icon-button" aria-label="Open menu">
-          <span className="icon-button__bar"></span>
-          <span className="icon-button__bar"></span>
-          <span className="icon-button__bar"></span>
-        </button>
         <Link to="/" className="nav__logo" style={{ textDecoration: 'none', color: 'inherit' }}>
           <img src="/assets/brand-logo.jpeg" alt="Indiaborn logo" />
           <div>
@@ -105,17 +115,84 @@ export default function Header({ onSearch }) {
             </button>
             {showCategoryDropdown && (
               <div className="category-dropdown-menu">
-                <a href="#collections" onClick={() => setShowCategoryDropdown(false)}>All Categories</a>
-                <a href="#collections" onClick={() => setShowCategoryDropdown(false)}>Jewellary</a>
-                <a href="#collections" onClick={() => setShowCategoryDropdown(false)}>Sports Equipment</a>
+                <a href="#collections" onClick={() => handleCategoryClick(null)}>All Products</a>
+                
                 <div className="category-submenu">
-                  <span className="category-submenu-label">Fashion ›</span>
+                  <span className="category-submenu-label">Jewelry ›</span>
                   <div className="category-submenu-items">
-                    <a href="#collections" onClick={() => setShowCategoryDropdown(false)}>Men</a>
-                    <a href="#collections" onClick={() => setShowCategoryDropdown(false)}>Women</a>
-                    <a href="#collections" onClick={() => setShowCategoryDropdown(false)}>Kids</a>
+                    <a href="#collections" onClick={() => handleCategoryClick('Jewelry', 'Necklaces')}>Necklaces</a>
+                    <a href="#collections" onClick={() => handleCategoryClick('Jewelry', 'Earrings')}>Earrings</a>
+                    <a href="#collections" onClick={() => handleCategoryClick('Jewelry', 'Rings')}>Rings</a>
+                    <a href="#collections" onClick={() => handleCategoryClick('Jewelry', 'Bracelets')}>Bracelets</a>
+                    <a href="#collections" onClick={() => handleCategoryClick('Jewelry', 'Bangles')}>Bangles</a>
+                    <a href="#collections" onClick={() => handleCategoryClick('Jewelry', 'Anklets')}>Anklets</a>
                   </div>
                 </div>
+                
+                <div className="category-submenu">
+                  <span className="category-submenu-label">Sports Equipment ›</span>
+                  <div className="category-submenu-items">
+                    <a href="#collections" onClick={() => handleCategoryClick('Sports Equipment', 'Cricket')}>Cricket</a>
+                    <a href="#collections" onClick={() => handleCategoryClick('Sports Equipment', 'Football')}>Football</a>
+                    <a href="#collections" onClick={() => handleCategoryClick('Sports Equipment', 'Tennis')}>Tennis</a>
+                    <a href="#collections" onClick={() => handleCategoryClick('Sports Equipment', 'Badminton')}>Badminton</a>
+                    <a href="#collections" onClick={() => handleCategoryClick('Sports Equipment', 'Basketball')}>Basketball</a>
+                    <a href="#collections" onClick={() => handleCategoryClick('Sports Equipment', 'Hockey')}>Hockey</a>
+                    <a href="#collections" onClick={() => handleCategoryClick('Sports Equipment', 'Gym & Fitness')}>Gym & Fitness</a>
+                  </div>
+                </div>
+                
+                <div className="category-submenu">
+                  <span className="category-submenu-label">Clothing ›</span>
+                  <div className="category-submenu-items">
+                    <a href="#collections" onClick={() => handleCategoryClick('Clothing', 'Men')}>Men</a>
+                    <a href="#collections" onClick={() => handleCategoryClick('Clothing', 'Women')}>Women</a>
+                    <a href="#collections" onClick={() => handleCategoryClick('Clothing', 'Kids')}>Kids</a>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="category-dropdown">
+            <button 
+              type="button"
+              className="category-dropdown-btn"
+              onClick={() => setShowPriceDropdown(!showPriceDropdown)}
+            >
+              Price ▾
+            </button>
+            {showPriceDropdown && (
+              <div className="category-dropdown-menu">
+                <a href="#collections" onClick={() => {
+                  setSelectedPrice('all');
+                  setShowPriceDropdown(false);
+                  if (onPriceFilter) onPriceFilter('all');
+                }}>All</a>
+                <a href="#collections" onClick={() => {
+                  setSelectedPrice('under-299');
+                  setShowPriceDropdown(false);
+                  if (onPriceFilter) onPriceFilter('under-299');
+                }}>Under ₹299</a>
+                <a href="#collections" onClick={() => {
+                  setSelectedPrice('300-599');
+                  setShowPriceDropdown(false);
+                  if (onPriceFilter) onPriceFilter('300-599');
+                }}>₹300 - ₹599</a>
+                <a href="#collections" onClick={() => {
+                  setSelectedPrice('600-999');
+                  setShowPriceDropdown(false);
+                  if (onPriceFilter) onPriceFilter('600-999');
+                }}>₹600 - ₹999</a>
+                <a href="#collections" onClick={() => {
+                  setSelectedPrice('1000-1999');
+                  setShowPriceDropdown(false);
+                  if (onPriceFilter) onPriceFilter('1000-1999');
+                }}>₹1,000 - ₹1,999</a>
+                <a href="#collections" onClick={() => {
+                  setSelectedPrice('2000-plus');
+                  setShowPriceDropdown(false);
+                  if (onPriceFilter) onPriceFilter('2000-plus');
+                }}>₹2,000+</a>
               </div>
             )}
           </div>
@@ -182,6 +259,7 @@ export default function Header({ onSearch }) {
         </div>
       )}
     </header>
+    </>
   )
 }
 

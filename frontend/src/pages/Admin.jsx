@@ -22,6 +22,14 @@ export default function Admin() {
     salePrice: '',
     inventory: '',
     category: '',
+    subCategory: '',
+    productType: '',
+    gender: '',
+    sport: '',
+    material: '',
+    brand: '',
+    availableSizes: [],
+    availableColors: [],
     imageUrl: '',
     isBestSeller: false,
     isNewArrival: false,
@@ -84,6 +92,14 @@ export default function Admin() {
       salePrice: '',
       inventory: '',
       category: '',
+      subCategory: '',
+      productType: '',
+      gender: '',
+      sport: '',
+      material: '',
+      brand: '',
+      availableSizes: [],
+      availableColors: [],
       imageUrl: '',
       isBestSeller: false,
       isNewArrival: false,
@@ -127,6 +143,14 @@ export default function Admin() {
       salePrice: product.salePrice?.toString() || '',
       inventory: product.inventoryCount.toString(),
       category: product.category || '',
+      subCategory: product.subCategory || '',
+      productType: product.productType || '',
+      gender: product.gender || '',
+      sport: product.sport || '',
+      material: product.material || '',
+      brand: product.brand || '',
+      availableSizes: product.availableSizes || [],
+      availableColors: product.availableColors || [],
       imageUrl: existingImageUrl,
       isBestSeller: product.isBestSeller || false,
       isNewArrival: product.isNewArrival || false,
@@ -161,7 +185,15 @@ export default function Admin() {
         price: Number(formData.price),
         salePrice: formData.salePrice ? Number(formData.salePrice) : null,
         inventoryCount: Number(formData.inventory),
-        category: formData.category || 'Jewelry',
+        category: formData.category || 'Sports Equipment',
+        subCategory: formData.subCategory || '',
+        productType: formData.productType || '',
+        gender: formData.gender || '',
+        sport: formData.sport || '',
+        material: formData.material || '',
+        brand: formData.brand || '',
+        availableSizes: formData.availableSizes,
+        availableColors: formData.availableColors,
         isBestSeller: formData.isBestSeller,
         isNewArrival: formData.isNewArrival,
         isOnSale: formData.isOnSale,
@@ -169,6 +201,10 @@ export default function Admin() {
           ? [{ url: formData.imageUrl, altText: formData.name, isPrimary: true }]
           : [],
       }
+
+      console.log('💾 Saving product with data:', data)
+      console.log('📋 Form gender value:', formData.gender)
+      console.log('📋 Data gender value:', data.gender)
 
       if (editingProduct) {
         await productApi.update(editingProduct, data, token)
@@ -184,6 +220,14 @@ export default function Admin() {
         salePrice: '',
         inventory: '',
         category: '',
+        subCategory: '',
+        productType: '',
+        gender: '',
+        sport: '',
+        material: '',
+        brand: '',
+        availableSizes: [],
+        availableColors: [],
         imageUrl: '',
         isBestSeller: false,
         isNewArrival: false,
@@ -335,10 +379,167 @@ export default function Admin() {
                 required
               >
                 <option value="">Select a category</option>
-                <option value="Jewellary">Jewellary</option>
+                <option value="Jewelry">Jewelry</option>
                 <option value="Sports Equipment">Sports Equipment</option>
-                <option value="Fashion">Fashion</option>
+                <option value="Clothing">Clothing</option>
               </select>
+            </label>
+            
+            {formData.category === 'Jewelry' && (
+              <>
+                <label>
+                  Jewelry Type
+                  <select
+                    value={formData.subCategory}
+                    onChange={(e) => setFormData({ ...formData, subCategory: e.target.value })}
+                    required
+                  >
+                    <option value="">Select jewelry type</option>
+                    <option value="Necklaces">Necklaces</option>
+                    <option value="Earrings">Earrings</option>
+                    <option value="Rings">Rings</option>
+                    <option value="Bracelets">Bracelets</option>
+                    <option value="Bangles">Bangles</option>
+                    <option value="Anklets">Anklets</option>
+                  </select>
+                </label>
+                <label>
+                  Metal Type
+                  <input
+                    type="text"
+                    placeholder="e.g., Gold, Silver, Rose Gold, Platinum"
+                    value={formData.material}
+                    onChange={(e) => setFormData({ ...formData, material: e.target.value })}
+                  />
+                </label>
+                <label>
+                  Purity
+                  <input
+                    type="text"
+                    placeholder="e.g., 18K, 22K, 925 Sterling Silver"
+                    value={formData.productType}
+                    onChange={(e) => setFormData({ ...formData, productType: e.target.value })}
+                  />
+                </label>
+                <label>
+                  Available Sizes (Optional)
+                  <input
+                    type="text"
+                    placeholder="e.g., 6, 7, 8, 9 (for rings) or leave empty"
+                    value={formData.availableSizes.join(', ')}
+                    onChange={(e) => setFormData({ 
+                      ...formData, 
+                      availableSizes: e.target.value.split(',').map(s => s.trim()).filter(s => s) 
+                    })}
+                  />
+                </label>
+              </>
+            )}
+            
+            {formData.category === 'Sports Equipment' && (
+              <>
+                <label>
+                  Sport Type
+                  <select
+                    value={formData.sport}
+                    onChange={(e) => setFormData({ ...formData, sport: e.target.value })}
+                    required
+                  >
+                    <option value="">Select sport</option>
+                    <option value="Cricket">Cricket</option>
+                    <option value="Football">Football</option>
+                    <option value="Tennis">Tennis</option>
+                    <option value="Badminton">Badminton</option>
+                    <option value="Basketball">Basketball</option>
+                    <option value="Hockey">Hockey</option>
+                    <option value="Volleyball">Volleyball</option>
+                    <option value="Table Tennis">Table Tennis</option>
+                    <option value="Swimming">Swimming</option>
+                    <option value="Athletics">Athletics</option>
+                    <option value="Gym & Fitness">Gym & Fitness</option>
+                  </select>
+                </label>
+                <label>
+                  Product Type
+                  <input
+                    type="text"
+                    placeholder="e.g., Bat, Ball, Racket, Shoes"
+                    value={formData.productType}
+                    onChange={(e) => setFormData({ ...formData, productType: e.target.value })}
+                  />
+                </label>
+              </>
+            )}
+            
+            {formData.category === 'Clothing' && (
+              <>
+                <label>
+                  Gender
+                  <select
+                    value={formData.gender}
+                    onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                    required
+                  >
+                    <option value="">Select gender</option>
+                    <option value="Men">Men</option>
+                    <option value="Women">Women</option>
+                    <option value="Kids">Kids</option>
+                    <option value="Unisex">Unisex</option>
+                  </select>
+                </label>
+                <label>
+                  Product Type
+                  <input
+                    type="text"
+                    placeholder="e.g., T-Shirt, Jersey, Shorts, Trackpants"
+                    value={formData.productType}
+                    onChange={(e) => setFormData({ ...formData, productType: e.target.value })}
+                  />
+                </label>
+                <label>
+                  Material
+                  <input
+                    type="text"
+                    placeholder="e.g., Cotton, Polyester, Dri-FIT"
+                    value={formData.material}
+                    onChange={(e) => setFormData({ ...formData, material: e.target.value })}
+                  />
+                </label>
+                <label>
+                  Available Sizes
+                  <input
+                    type="text"
+                    placeholder="e.g., XS, S, M, L, XL, XXL (comma-separated)"
+                    value={formData.availableSizes.join(', ')}
+                    onChange={(e) => setFormData({ 
+                      ...formData, 
+                      availableSizes: e.target.value.split(',').map(s => s.trim()).filter(s => s) 
+                    })}
+                  />
+                </label>
+                <label>
+                  Available Colors
+                  <input
+                    type="text"
+                    placeholder="e.g., Black, White, Blue (comma-separated)"
+                    value={formData.availableColors.join(', ')}
+                    onChange={(e) => setFormData({ 
+                      ...formData, 
+                      availableColors: e.target.value.split(',').map(s => s.trim()).filter(s => s) 
+                    })}
+                  />
+                </label>
+              </>
+            )}
+            
+            <label>
+              Brand (Optional)
+              <input
+                type="text"
+                placeholder="e.g., Nike, Adidas, Puma"
+                value={formData.brand}
+                onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
+              />
             </label>
             <div className="upload-section">
               <label>Product Image</label>

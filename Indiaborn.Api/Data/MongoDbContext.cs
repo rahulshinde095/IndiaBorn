@@ -12,7 +12,22 @@ public class MongoDbContext
     public MongoDbContext(IOptions<MongoSettings> settings)
     {
         _settings = settings.Value;
-        var client = new MongoClient(_settings.ConnectionString);
+        
+        // Configure MongoDB client settings for SSL/TLS
+        var mongoUrl = MongoUrl.Create(_settings.ConnectionString);
+        var clientSettings = MongoClientSettings.FromUrl(mongoUrl);
+        
+        // Enable TLS 1.2+ for MongoDB Atlas
+        clientSettings.SslSettings = new SslSettings
+        {
+            EnabledSslProtocols = System.Security.Authentication.SslProtocols.Tls12
+        };
+        
+        // Set longer timeouts for Render's free tier cold starts
+        clientSettings.ConnectTimeout = TimeSpan.FromSeconds(30);
+        clientSettings.ServerSelectionTimeout = TimeSpan.FromSeconds(30);
+        
+        var client = new MongoClient(clientSettings);
         _database = client.GetDatabase(_settings.DatabaseName);
     }
 

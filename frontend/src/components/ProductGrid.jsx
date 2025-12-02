@@ -14,14 +14,21 @@ const priceRanges = {
   '2000-plus': { min: 2000, max: Infinity },
 }
 
-export default function ProductGrid() {
-  const { searchQuery } = useOutletContext() || { searchQuery: '' }
+export default function ProductGrid({ categoryFilter = null, subcategoryFilter = null }) {
+  const outletContext = useOutletContext() || {}
+  const { searchQuery, categoryFilter: contextCategoryFilter, subcategoryFilter: contextSubcategoryFilter, priceFilter } = outletContext
+  
+  // Use props if provided, otherwise use context (for flexibility)
+  const activeCategoryFilter = categoryFilter || contextCategoryFilter || null
+  const activeSubcategoryFilter = subcategoryFilter || contextSubcategoryFilter || null
+  const priceRange = priceFilter || 'all'
+  
   const [products, setProducts] = useState([])
   const [filteredProducts, setFilteredProducts] = useState([])
-  const [priceRange, setPriceRange] = useState('all')
   const [imageErrors, setImageErrors] = useState({})
   const [imageLoading, setImageLoading] = useState({})
   const [expandedDescriptions, setExpandedDescriptions] = useState({})
+  const [fullscreenImage, setFullscreenImage] = useState(null)
   const { addToCart } = useCart()
 
   useEffect(() => {
@@ -62,6 +69,13 @@ export default function ProductGrid() {
     const searchLower = (searchQuery || '').trim().toLowerCase()
     const range = priceRanges[priceRange]
 
+    console.log('Filtering products:', {
+      totalProducts: products.length,
+      activeCategoryFilter,
+      activeSubcategoryFilter,
+      sampleProduct: products[0]
+    })
+
     const filtered = products.filter(product => {
       const haystack = `${product.name} ${product.description}`.toLowerCase()
       const matchesSearch = !searchLower || haystack.includes(searchLower)
@@ -71,8 +85,35 @@ export default function ProductGrid() {
         (effectivePrice >= range.min &&
           (Number.isFinite(range.max) ? effectivePrice <= range.max : true))
 
-      return matchesSearch && matchesRange
+      // Category filtering (case-insensitive)
+      const matchesCategory = !activeCategoryFilter || 
+        (product.category && product.category.toLowerCase() === activeCategoryFilter.toLowerCase())
+      
+      // Subcategory filtering (checks subCategory, sport, and gender fields, case-insensitive)
+      const matchesSubcategory = !activeSubcategoryFilter || 
+        (product.subCategory && product.subCategory.toLowerCase() === activeSubcategoryFilter.toLowerCase()) ||
+        (product.sport && product.sport.toLowerCase() === activeSubcategoryFilter.toLowerCase()) ||
+        (product.gender && product.gender.toLowerCase() === activeSubcategoryFilter.toLowerCase())
+
+      const matches = matchesSearch && matchesRange && matchesCategory && matchesSubcategory
+      
+      // Debug logging for first product
+      if (product === products[0]) {
+        console.log('First product filter check:', {
+          productName: product.name,
+          productCategory: product.category,
+          productGender: product.gender,
+          productSport: product.sport,
+          matchesCategory,
+          matchesSubcategory,
+          finalMatch: matches
+        })
+      }
+
+      return matches
     })
+
+    console.log('Filtered results:', filtered.length)
 
     // Add consistent review count to each product
     const filteredWithReviews = filtered.map(product => ({
@@ -81,39 +122,45 @@ export default function ProductGrid() {
     }))
 
     setFilteredProducts(filteredWithReviews)
-  }, [products, searchQuery, priceRange])
+  }, [products, searchQuery, priceRange, activeCategoryFilter, activeSubcategoryFilter])
 
   return (
     <section id="collections" className="section">
       <div className="section__header">
-        <p className="eyebrow">The New Minimal Gold Collection</p>
-        <h2>Everyday shine crafted in India</h2>
-        <p>Layering sets, bold statements, and delicate heirlooms</p>
-        <div className="price-filters" id="priceFilters">
-          <span>Shop by price:</span>
-          <div className="price-filters__chips">
-            {Object.keys(priceRanges).map(range => (
-              <button
-                key={range}
-                type="button"
-                data-range={range}
-                className={`chip ${priceRange === range ? 'chip--active' : ''}`}
-                onClick={() => setPriceRange(range)}
-              >
-                {range === 'all' ? 'All' :
-                 range === 'under-299' ? 'Under ₹299' :
-                 range === '300-599' ? '₹300 - ₹599' :
-                 range === '600-999' ? '₹600 - ₹999' :
-                 range === '1000-1999' ? '₹1,000 - ₹1,999' :
-                 '₹2,000+'}
-              </button>
-            ))}
+        <p className="eyebrow">Your One-Stop Shop for Everything</p>
+        <h2>Sports, Fashion & Lifestyle - All in One Place</h2>
+        <p>Premium sports equipment, trendy clothing, and quality products for every need</p>
+        {(activeCategoryFilter || activeSubcategoryFilter) && (
+          <div style={{ marginTop: '1rem', padding: '0.5rem', background: '#f0f0f0', borderRadius: '4px' }}>
+            <strong>Active Filter: </strong>
+            {activeCategoryFilter && <span>{activeCategoryFilter}</span>}
+            {activeSubcategoryFilter && <span> → {activeSubcategoryFilter}</span>}
+            <button 
+              onClick={() => window.location.reload()} 
+              style={{ marginLeft: '1rem', padding: '0.25rem 0.5rem', cursor: 'pointer' }}
+            >
+              Clear Filters
+            </button>
           </div>
-        </div>
+        )}
       </div>
       <div className="product-grid">
         {filteredProducts.length === 0 ? (
-          <p>No pieces found. Try another keyword or range.</p>
+          <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '2rem' }}>
+            <p>No products found.</p>
+            {products.length === 0 ? (
+              <p style={{ marginTop: '1rem' }}>
+                The database is empty. Please add products through the <a href="/admin" style={{ color: '#c9a668' }}>Admin Panel</a>.
+              </p>
+            ) : (
+              <p style={{ marginTop: '1rem' }}>
+                Try adjusting your filters or search criteria.
+                {(activeCategoryFilter || activeSubcategoryFilter) && (
+                  <span> Current filter: {activeCategoryFilter} {activeSubcategoryFilter && `→ ${activeSubcategoryFilter}`}</span>
+                )}
+              </p>
+            )}
+          </div>
         ) : (
           filteredProducts.map(product => {
             const original = Number(product.price)
@@ -137,21 +184,39 @@ export default function ProductGrid() {
                   <img 
                     src={imageErrors[product.id] ? fallbackUrl : imageUrl}
                     alt={product.name} 
-                    className="product__image"
+                    className="product__image product__image--clickable"
                     onLoad={() => handleImageLoad(product.id)}
                     onError={() => handleImageError(product.id)}
-                    style={{ display: imageLoading[product.id] ? 'none' : 'block' }}
+                    onClick={() => setFullscreenImage({ url: imageErrors[product.id] ? fallbackUrl : imageUrl, name: product.name, product: product })}
+                    style={{ display: imageLoading[product.id] ? 'none' : 'block', cursor: 'pointer' }}
+                    title="Click to view fullscreen"
                   />
-                  <button
-                    className="product__add-btn"
-                    onClick={() => addToCart(product)}
-                    aria-label="Add to cart"
-                  >
-                    <span>+</span>
-                  </button>
                 </div>
+                <button
+                  className="product__cart-btn"
+                  onClick={() => addToCart(product)}
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M2.5 3.5H3.5L5.5 11.5H13.5L15.5 5.5H4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <circle cx="6" cy="14" r="1" fill="currentColor"/>
+                    <circle cx="12" cy="14" r="1" fill="currentColor"/>
+                  </svg>
+                  Add to Cart
+                </button>
                 <div className="product__body">
                   <h3 className="product__title">{product.name}</h3>
+                  {(product.brand || product.sport || product.gender) && (
+                    <div className="product__meta">
+                      {product.brand && <span className="meta-badge">{product.brand}</span>}
+                      {product.sport && <span className="meta-badge">{product.sport}</span>}
+                      {product.gender && <span className="meta-badge">{product.gender}</span>}
+                    </div>
+                  )}
+                  {product.availableSizes && product.availableSizes.length > 0 && (
+                    <div className="product__sizes">
+                      <small>Sizes: {product.availableSizes.join(', ')}</small>
+                    </div>
+                  )}
                   <div className="product__rating">
                     <span className="stars">★★★★★</span>
                     <span className="rating-count">({product.reviewCount})</span>
@@ -195,6 +260,34 @@ export default function ProductGrid() {
           })
         )}
       </div>
+      
+      {fullscreenImage && (
+        <div className="fullscreen-modal" onClick={() => setFullscreenImage(null)}>
+          <div className="fullscreen-modal__content" onClick={(e) => e.stopPropagation()}>
+            <button className="fullscreen-modal__close" onClick={() => setFullscreenImage(null)} aria-label="Close">
+              ×
+            </button>
+            <img src={fullscreenImage.url} alt={fullscreenImage.name} className="fullscreen-modal__image" />
+            <div className="fullscreen-modal__info">
+              <p className="fullscreen-modal__caption">{fullscreenImage.name}</p>
+              <button 
+                className="fullscreen-modal__cart-btn"
+                onClick={() => {
+                  addToCart(fullscreenImage.product);
+                  setFullscreenImage(null);
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M2.5 3.5H3.5L5.5 11.5H13.5L15.5 5.5H4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <circle cx="6" cy="14" r="1" fill="currentColor"/>
+                  <circle cx="12" cy="14" r="1" fill="currentColor"/>
+                </svg>
+                Add to Cart
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   )
 }
