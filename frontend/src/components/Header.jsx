@@ -110,7 +110,6 @@ export default function Header({ onSearch, onCategoryFilter, onPriceFilter }) {
       </form>
 
       <div className="nav__subnav">
-        <span>Shop by</span>
         <nav>
           <div className="category-dropdown">
             <button 
@@ -141,12 +140,12 @@ export default function Header({ onSearch, onCategoryFilter, onPriceFilter }) {
                     Jewelry ›
                   </span>
                   <div className={`category-submenu-items ${expandedSubmenu === 'jewelry' ? 'expanded' : ''}`}>
-                    <a href="#collections" onClick={() => handleCategoryClick('Jewelry', 'Necklaces')}>Necklaces</a>
+                    <a href="#collections" onClick={() => handleCategoryClick('Jewelry', 'Imitation Necklaces')}>Imitation Necklaces</a>
                     <a href="#collections" onClick={() => handleCategoryClick('Jewelry', 'Earrings')}>Earrings</a>
+                    <a href="#collections" onClick={() => handleCategoryClick('Jewelry', 'Bangles & Bracelets')}>Bangles & Bracelets</a>
                     <a href="#collections" onClick={() => handleCategoryClick('Jewelry', 'Rings')}>Rings</a>
-                    <a href="#collections" onClick={() => handleCategoryClick('Jewelry', 'Bracelets')}>Bracelets</a>
-                    <a href="#collections" onClick={() => handleCategoryClick('Jewelry', 'Bangles')}>Bangles</a>
                     <a href="#collections" onClick={() => handleCategoryClick('Jewelry', 'Anklets')}>Anklets</a>
+                    <a href="#collections" onClick={() => handleCategoryClick('Jewelry', 'Jewellery Sets')}>Jewellery Sets</a>
                   </div>
                 </div>
                 
@@ -208,12 +207,12 @@ export default function Header({ onSearch, onCategoryFilter, onPriceFilter }) {
                         Women ›
                       </span>
                       <div className={`category-nested-submenu-items ${expandedNestedSubmenu === 'women' ? 'expanded' : ''}`}>
-                        <a href="#collections" onClick={() => handleCategoryClick('Clothing', 'Women', 'T-Shirts & Shirts')}>T-Shirts & Shirts</a>
-                        <a href="#collections" onClick={() => handleCategoryClick('Clothing', 'Women', 'Trousers & Jeans')}>Trousers & Jeans</a>
-                        <a href="#collections" onClick={() => handleCategoryClick('Clothing', 'Women', 'Ethnic Wear')}>Ethnic Wear</a>
-                        <a href="#collections" onClick={() => handleCategoryClick('Clothing', 'Women', 'Winter Wear')}>Winter Wear</a>
+                        <a href="#collections" onClick={() => handleCategoryClick('Clothing', 'Women', 'Tops & Dresses')}>Tops & Dresses</a>
+                        <a href="#collections" onClick={() => handleCategoryClick('Clothing', 'Women', 'Sarees & Kurtis')}>Sarees & Kurtis</a>
+                        <a href="#collections" onClick={() => handleCategoryClick('Clothing', 'Women', 'Western Wear')}>Western Wear</a>
+                        <a href="#collections" onClick={() => handleCategoryClick('Clothing', 'Women', 'Bottom Wear')}>Bottom Wear</a>
                         <a href="#collections" onClick={() => handleCategoryClick('Clothing', 'Women', 'Footwear')}>Footwear</a>
-                        <a href="#collections" onClick={() => handleCategoryClick('Clothing', 'Women', 'Accessories')}>Accessories</a>
+                        <a href="#collections" onClick={() => handleCategoryClick('Clothing', 'Women', 'Bags & Accessories')}>Bags & Accessories</a>
                       </div>
                     </div>
                     <div className="category-nested-submenu">
@@ -225,10 +224,9 @@ export default function Header({ onSearch, onCategoryFilter, onPriceFilter }) {
                         Kids ›
                       </span>
                       <div className={`category-nested-submenu-items ${expandedNestedSubmenu === 'kids' ? 'expanded' : ''}`}>
-                        <a href="#collections" onClick={() => handleCategoryClick('Clothing', 'Kids', 'T-Shirts & Shirts')}>T-Shirts & Shirts</a>
-                        <a href="#collections" onClick={() => handleCategoryClick('Clothing', 'Kids', 'Trousers & Jeans')}>Trousers & Jeans</a>
-                        <a href="#collections" onClick={() => handleCategoryClick('Clothing', 'Kids', 'Ethnic Wear')}>Ethnic Wear</a>
-                        <a href="#collections" onClick={() => handleCategoryClick('Clothing', 'Kids', 'Winter Wear')}>Winter Wear</a>
+                        <a href="#collections" onClick={() => handleCategoryClick('Clothing', 'Kids', 'Boys Clothing')}>Boys Clothing</a>
+                        <a href="#collections" onClick={() => handleCategoryClick('Clothing', 'Kids', 'Girls Clothing')}>Girls Clothing</a>
+                        <a href="#collections" onClick={() => handleCategoryClick('Clothing', 'Kids', 'Infants Wear')}>Infants Wear</a>
                         <a href="#collections" onClick={() => handleCategoryClick('Clothing', 'Kids', 'Footwear')}>Footwear</a>
                         <a href="#collections" onClick={() => handleCategoryClick('Clothing', 'Kids', 'Accessories')}>Accessories</a>
                       </div>
@@ -281,7 +279,6 @@ export default function Header({ onSearch, onCategoryFilter, onPriceFilter }) {
               </div>
             )}
           </div>
-          <a href="#collections">Deals</a>
           <Link to="/admin">Sell</Link>
           <a href="#story">Story</a>
           <a href="#order-history">Order History</a>

@@ -10,6 +10,12 @@ export default function OrderHistory() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    
+    if (!email.trim()) {
+      setOrders([])
+      return
+    }
+    
     setIsLoading(true)
     try {
       const result = await orderApi.getHistory(email)
@@ -45,7 +51,7 @@ export default function OrderHistory() {
         </button>
       </form>
       <div id="historyResults" className="history-results">
-        {orders.length === 0 ? (
+        {email.trim() && orders.length === 0 && !isLoading ? (
           <p>No orders found.</p>
         ) : (
           orders.map(order => (

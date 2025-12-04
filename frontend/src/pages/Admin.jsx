@@ -395,12 +395,12 @@ export default function Admin() {
                     required
                   >
                     <option value="">Select jewelry type</option>
-                    <option value="Necklaces">Necklaces</option>
+                    <option value="Imitation Necklaces">Imitation Necklaces</option>
                     <option value="Earrings">Earrings</option>
+                    <option value="Bangles & Bracelets">Bangles & Bracelets</option>
                     <option value="Rings">Rings</option>
-                    <option value="Bracelets">Bracelets</option>
-                    <option value="Bangles">Bangles</option>
                     <option value="Anklets">Anklets</option>
+                    <option value="Jewellery Sets">Jewellery Sets</option>
                   </select>
                 </label>
                 <label>
@@ -495,12 +495,33 @@ export default function Admin() {
                     required
                   >
                     <option value="">Select clothing type</option>
-                    <option value="T-Shirts & Shirts">T-Shirts & Shirts</option>
-                    <option value="Trousers & Jeans">Trousers & Jeans</option>
-                    <option value="Ethnic Wear">Ethnic Wear</option>
-                    <option value="Winter Wear">Winter Wear</option>
-                    <option value="Footwear">Footwear</option>
-                    <option value="Accessories">Accessories</option>
+                    {formData.gender === 'Women' ? (
+                      <>
+                        <option value="Tops & Dresses">Tops & Dresses</option>
+                        <option value="Sarees & Kurtis">Sarees & Kurtis</option>
+                        <option value="Western Wear">Western Wear</option>
+                        <option value="Bottom Wear">Bottom Wear</option>
+                        <option value="Footwear">Footwear</option>
+                        <option value="Bags & Accessories">Bags & Accessories</option>
+                      </>
+                    ) : formData.gender === 'Kids' ? (
+                      <>
+                        <option value="Boys Clothing">Boys Clothing</option>
+                        <option value="Girls Clothing">Girls Clothing</option>
+                        <option value="Infants Wear">Infants Wear</option>
+                        <option value="Footwear">Footwear</option>
+                        <option value="Accessories">Accessories</option>
+                      </>
+                    ) : (
+                      <>
+                        <option value="T-Shirts & Shirts">T-Shirts & Shirts</option>
+                        <option value="Trousers & Jeans">Trousers & Jeans</option>
+                        <option value="Ethnic Wear">Ethnic Wear</option>
+                        <option value="Winter Wear">Winter Wear</option>
+                        <option value="Footwear">Footwear</option>
+                        <option value="Accessories">Accessories</option>
+                      </>
+                    )}
                   </select>
                 </label>
                 <label>
