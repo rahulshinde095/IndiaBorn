@@ -126,23 +126,23 @@ export default function ProductGrid({ categoryFilter = null, subcategoryFilter =
 
   return (
     <section id="collections" className="section">
+      {(activeCategoryFilter || activeSubcategoryFilter) && (
+        <div className="active-filter-badge">
+          <strong>Active Filter: </strong>
+          {activeCategoryFilter && <span>{activeCategoryFilter}</span>}
+          {activeSubcategoryFilter && <span> → {activeSubcategoryFilter}</span>}
+          <button 
+            onClick={() => window.location.reload()} 
+            className="clear-filter-btn"
+          >
+            Clear Filters
+          </button>
+        </div>
+      )}
       <div className="section__header">
         <p className="eyebrow">Your One-Stop Shop for Everything</p>
         <h2>Sports, Fashion & Lifestyle - All in One Place</h2>
         <p>Premium sports equipment, trendy clothing, and quality products for every need</p>
-        {(activeCategoryFilter || activeSubcategoryFilter) && (
-          <div style={{ marginTop: '1rem', padding: '0.5rem', background: '#f0f0f0', borderRadius: '4px' }}>
-            <strong>Active Filter: </strong>
-            {activeCategoryFilter && <span>{activeCategoryFilter}</span>}
-            {activeSubcategoryFilter && <span> → {activeSubcategoryFilter}</span>}
-            <button 
-              onClick={() => window.location.reload()} 
-              style={{ marginLeft: '1rem', padding: '0.25rem 0.5rem', cursor: 'pointer' }}
-            >
-              Clear Filters
-            </button>
-          </div>
-        )}
       </div>
       <div className="product-grid">
         {filteredProducts.length === 0 ? (

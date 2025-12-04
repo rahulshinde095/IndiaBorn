@@ -488,6 +488,22 @@ export default function Admin() {
                   </select>
                 </label>
                 <label>
+                  Clothing Type
+                  <select
+                    value={formData.subCategory}
+                    onChange={(e) => setFormData({ ...formData, subCategory: e.target.value })}
+                    required
+                  >
+                    <option value="">Select clothing type</option>
+                    <option value="T-Shirts & Shirts">T-Shirts & Shirts</option>
+                    <option value="Trousers & Jeans">Trousers & Jeans</option>
+                    <option value="Ethnic Wear">Ethnic Wear</option>
+                    <option value="Winter Wear">Winter Wear</option>
+                    <option value="Footwear">Footwear</option>
+                    <option value="Accessories">Accessories</option>
+                  </select>
+                </label>
+                <label>
                   Product Type
                   <input
                     type="text"

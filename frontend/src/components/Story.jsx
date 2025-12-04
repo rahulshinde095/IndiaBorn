@@ -17,15 +17,6 @@ export default function Story() {
           <li>Complimentary lifetime polishing</li>
         </ul>
       </div>
-      <div className="card">
-        <h3>Need it personalized?</h3>
-        <p>
-          Our design team can engrave initials, motifs, and wedding crests.
-        </p>
-        <a className="button button--ghost" href="tel:+919834559443">
-          Talk to a stylist
-        </a>
-      </div>
     </section>
   )
 }

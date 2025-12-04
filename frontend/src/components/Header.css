@@ -258,13 +258,12 @@
   transition: all 0.2s ease;
   border-bottom: 1px solid #f0f0f0;
   font-weight: 600;
+  user-select: none;
 }
 
 .category-submenu:hover .category-submenu-label {
   background: #f8f8f8;
   color: #5c4033 !important;
-}
-  color: var(--gold, #c9a668);
   padding-left: 1.25rem;
 }
 
@@ -282,7 +281,8 @@
   animation: slideIn 0.2s ease;
 }
 
-.category-submenu:hover .category-submenu-items {
+.category-submenu:hover .category-submenu-items,
+.category-submenu-items.expanded {
   display: block;
 }
 
@@ -303,6 +303,50 @@
 .category-submenu-items a:hover {
   background: #f8f8f8;
   color: var(--gold, #c9a668);
+  padding-left: 1.25rem;
+}
+
+/* Nested Submenu (e.g., Men's subcategories) */
+.category-nested-submenu {
+  position: relative;
+}
+
+.category-nested-submenu-items {
+  display: none;
+  position: absolute;
+  left: 100%;
+  top: 0;
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 180px;
+  margin-left: 0.5rem;
+  animation: slideIn 0.2s ease;
+}
+
+.category-nested-submenu:hover .category-nested-submenu-items,
+.category-nested-submenu-items.expanded {
+  display: block;
+}
+
+.category-nested-submenu-items a {
+  display: block;
+  padding: 0.75rem 1rem;
+  color: #1a1a1a;
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.category-nested-submenu-items a:last-child {
+  border-bottom: none;
+}
+
+.category-nested-submenu-items a:hover {
+  background: #f8f8f8;
+  color: #5c4033;
   padding-left: 1.25rem;
 }
 
@@ -388,7 +432,7 @@
   }
 
   .category-submenu:hover .category-submenu-items,
-  .category-submenu.active .category-submenu-items {
+  .category-submenu-items.expanded {
     display: block;
   }
 
@@ -400,5 +444,32 @@
 
   .category-submenu-items a:hover {
     background: #ececec;
+  }
+
+  /* Nested Submenu Mobile */
+  .category-nested-submenu-items {
+    position: static;
+    display: none;
+    margin-left: 0;
+    margin-top: 0;
+    border: none;
+    box-shadow: none;
+    border-left: 2px solid #8b6f47;
+    padding-left: 0.5rem;
+  }
+
+  .category-nested-submenu:hover .category-nested-submenu-items,
+  .category-nested-submenu-items.expanded {
+    display: block;
+  }
+
+  .category-nested-submenu-items a {
+    padding: 0.65rem 1rem;
+    font-size: 0.85rem;
+    background: #f0f0f0;
+  }
+
+  .category-nested-submenu-items a:hover {
+    background: #e5e5e5;
   }
 }
