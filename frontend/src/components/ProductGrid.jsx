@@ -36,7 +36,8 @@ export default function ProductGrid({ categoryFilter = null, subcategoryFilter =
   }, [])
 
   const getImageUrl = (product) => {
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5184';
+    // Use window.location.origin to work in both dev and production
+    const API_URL = import.meta.env.VITE_API_URL || window.location.origin;
     let imageUrl = product.images?.find(i => i.isPrimary)?.url ||
       product.images?.[0]?.url ||
       '/assets/brand-logo.jpeg'
@@ -169,7 +170,7 @@ export default function ProductGrid({ categoryFilter = null, subcategoryFilter =
             const discountPercent = hasDiscount ? Math.round((1 - current / original) * 100) : null
             
             const imageUrl = getImageUrl(product)
-            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5184';
+            const API_URL = import.meta.env.VITE_API_URL || window.location.origin;
             const fallbackUrl = `${API_URL}/assets/brand-logo.jpeg`
 
             return (

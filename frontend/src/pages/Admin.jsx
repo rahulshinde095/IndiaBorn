@@ -593,7 +593,7 @@ export default function Admin() {
                 {formData.imageUrl && !uploadingImage && (
                   <div className="image-preview">
                     <img 
-                      src={formData.imageUrl.startsWith('/') ? `http://localhost:5184${formData.imageUrl}` : formData.imageUrl} 
+                      src={formData.imageUrl.startsWith('/') ? `${window.location.origin}${formData.imageUrl}` : formData.imageUrl} 
                       alt="Preview" 
                     />
                     <p className="upload-status success">✓ Image ready</p>
