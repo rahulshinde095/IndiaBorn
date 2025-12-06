@@ -587,7 +587,7 @@ export default function Admin() {
                 <input
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
-                  onChange={handleFileSelect}
+                  onChange={handleImageUpload}
                   disabled={uploadingImage}
                 />
                 {uploadingImage && (
