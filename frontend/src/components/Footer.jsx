@@ -17,7 +17,7 @@ export default function Footer() {
           <h4>Services & Apps</h4>
           <a href="#checkout">Indiaborn™ Pay</a>
           <a href="#collections">Live trunk shows</a>
-          <Link to="/admin">Sell with us</Link>
+          <Link to="/admin">Admin</Link>
           <a href="#collections">Returns</a>
         </div>
         <div>

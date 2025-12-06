@@ -280,7 +280,7 @@ export default function Header({ onSearch, onCategoryFilter, onPriceFilter }) {
               </div>
             )}
           </div>
-          <Link to="/admin">Sell</Link>
+          <Link to="/admin">Admin</Link>
           <a href="#story">Story</a>
           <a href="#order-history">Order History</a>
         </nav>
