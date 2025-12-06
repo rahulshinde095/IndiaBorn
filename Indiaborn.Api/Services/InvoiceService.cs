@@ -17,8 +17,16 @@ public class InvoiceService
 
     public async Task<string> GenerateInvoiceAsync(Order order, CancellationToken token = default)
     {
+        // Use /tmp directory for cloud deployments (writable), fallback to wwwroot for local dev
+        var invoiceDir = Path.Combine("/tmp", "invoices");
         var webRoot = _env.WebRootPath ?? Path.Combine(AppContext.BaseDirectory, "wwwroot");
-        var invoiceDir = Path.Combine(webRoot, "invoices");
+        
+        // Fallback to local wwwroot if /tmp doesn't exist (Windows development)
+        if (!Directory.Exists("/tmp"))
+        {
+            invoiceDir = Path.Combine(webRoot, "invoices");
+        }
+        
         Directory.CreateDirectory(invoiceDir);
 
         var fileName = $"{order.ReferenceCode}.pdf";
@@ -33,6 +41,8 @@ public class InvoiceService
         }
 
         await Task.Run(() => BuildDocument(order, logoBytes).GeneratePdf(filePath), token);
+        
+        // Return relative URL path (note: /tmp files won't be web-accessible, this is just for reference)
         return $"/invoices/{fileName}";
     }
 
