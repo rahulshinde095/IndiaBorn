@@ -169,6 +169,9 @@ public class OrderService
     public async Task<Order?> GetByIdAsync(string id, CancellationToken token = default)
         => await _orders.Find(o => o.Id == id).FirstOrDefaultAsync(token);
 
+    public async Task<Order?> GetByReferenceCodeAsync(string referenceCode, CancellationToken token = default)
+        => await _orders.Find(o => o.ReferenceCode == referenceCode).FirstOrDefaultAsync(token);
+
     public async Task<List<Order>> GetHistoryByEmailAsync(string email, CancellationToken token = default)
         => await _orders.Find(o => o.Contact.Email == email)
             .SortByDescending(o => o.CreatedAt)

@@ -62,7 +62,7 @@ export default function OrderHistory() {
               <p>Total: {formatCurrency(order.total)}</p>
               {order.invoiceUrl && (
                 <a 
-                  href={`/api/orders/${order.id}/invoice`} 
+                  href={`/api/invoice/${order.referenceCode}`} 
                   download={`Invoice-${order.referenceCode}.pdf`}
                   className="button button--ghost"
                   style={{ marginTop: '10px', display: 'inline-block', padding: '8px 16px' }}

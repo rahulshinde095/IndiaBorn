@@ -198,7 +198,7 @@ function TestCheckoutForm() {
     try {
       const order = await orderApi.createTest(payload)
       const invoiceLink = order.invoiceUrl 
-        ? ` <a href="/api/orders/${order.id}/invoice" download="Invoice-${order.referenceCode}.pdf" style="color: #10b981; text-decoration: underline;">Download Invoice</a>`
+        ? ` <a href="/api/invoice/${order.referenceCode}" download="Invoice-${order.referenceCode}.pdf" style="color: #10b981; text-decoration: underline;">Download Invoice</a>`
         : ''
       setMessage(`✅ Test order created successfully! Order: ${order.referenceCode}${invoiceLink}`)
       clearCart()

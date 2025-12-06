@@ -46,6 +46,21 @@ public class InvoiceService
         return $"/invoices/{fileName}";
     }
 
+    public async Task<byte[]> GenerateInvoiceBytesAsync(Order order, CancellationToken token = default)
+    {
+        var webRoot = _env.WebRootPath ?? Path.Combine(AppContext.BaseDirectory, "wwwroot");
+        
+        // Load logo image if exists
+        byte[]? logoBytes = null;
+        var logoPath = Path.Combine(webRoot, "assets", "brand-logo.jpeg");
+        if (File.Exists(logoPath))
+        {
+            logoBytes = await File.ReadAllBytesAsync(logoPath, token);
+        }
+
+        return await Task.Run(() => BuildDocument(order, logoBytes).GeneratePdf(), token);
+    }
+
     private static Document BuildDocument(Order order, byte[]? logoBytes)
         => Document.Create(container =>
         {
