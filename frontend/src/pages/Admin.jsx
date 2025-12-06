@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { authApi, productApi, adminApi, uploadApi } from '../services/api'
 import './Admin.css'
 
 const STORAGE_KEY = 'indiaborn-admin-token'
 
 export default function Admin() {
+  const navigate = useNavigate()
   const [token, setToken] = useState(localStorage.getItem(STORAGE_KEY))
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -105,9 +106,11 @@ export default function Admin() {
       isNewArrival: false,
       isOnSale: false,
     })
+    // Redirect to home page
+    navigate('/')
   }
 
-  const handleFileSelect = async (e) => {
+  const handleImageUpload = async (e) => {
     const file = e.target.files[0]
     if (!file) return
 
