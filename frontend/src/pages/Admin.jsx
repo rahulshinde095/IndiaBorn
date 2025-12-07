@@ -263,31 +263,41 @@ export default function Admin() {
             </label>
             <label>
               Password
-              <div style={{ position: 'relative' }}>
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                 <input
                   type={showPassword ? "text" : "password"}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  style={{ paddingRight: '40px' }}
+                  style={{ width: '100%', paddingRight: '45px' }}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   style={{
                     position: 'absolute',
-                    right: '10px',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    background: 'none',
-                    border: 'none',
+                    right: '12px',
+                    background: 'transparent',
+                    border: '1px solid #ccc',
+                    borderRadius: '4px',
                     cursor: 'pointer',
-                    fontSize: '18px',
-                    padding: '5px'
+                    fontSize: '12px',
+                    padding: '4px 8px',
+                    color: '#666',
+                    fontWeight: '500',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.background = '#f0f0f0'
+                    e.target.style.borderColor = '#999'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.background = 'transparent'
+                    e.target.style.borderColor = '#ccc'
                   }}
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  {showPassword ? '👁️' : '👁️‍🗨️'}
+                  {showPassword ? 'Hide' : 'Show'}
                 </button>
               </div>
             </label>
