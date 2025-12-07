@@ -32,52 +32,59 @@ public class UploadController : ControllerBase
             return BadRequest("File size exceeds 5MB limit.");
 
         var webRoot = _env.WebRootPath ?? Path.Combine(AppContext.BaseDirectory, "wwwroot");
+        var fileName = $"{Guid.NewGuid()}{extension}";
         string uploadsDir;
+        string filePath;
         bool isUsingTmp = false;
 
-        // Try wwwroot first, fallback to /tmp if it fails
-        try
-        {
-            uploadsDir = Path.Combine(webRoot, "assets", "products");
-            Directory.CreateDirectory(uploadsDir);
-            _logger.LogInformation("Using wwwroot directory: {Path}", uploadsDir);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Cannot create directory in wwwroot, using /tmp");
-            uploadsDir = Path.Combine("/tmp", "assets", "products");
-            Directory.CreateDirectory(uploadsDir);
-            isUsingTmp = true;
-            _logger.LogInformation("Using /tmp directory: {Path}", uploadsDir);
-        }
-
-        var fileName = $"{Guid.NewGuid()}{extension}";
-        var filePath = Path.Combine(uploadsDir, fileName);
+        // Try to save to wwwroot first
+        uploadsDir = Path.Combine(webRoot, "assets", "products");
+        Directory.CreateDirectory(uploadsDir);
+        filePath = Path.Combine(uploadsDir, fileName);
 
         try
         {
-            _logger.LogInformation("Saving file to: {Path}", filePath);
+            _logger.LogInformation("Attempting to save file to wwwroot: {Path}", filePath);
             
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
                 await file.CopyToAsync(stream, token);
             }
 
-            _logger.LogInformation("File saved successfully: {FileName}", fileName);
-
-            // If using /tmp, return API endpoint URL, otherwise return static file path
-            var url = isUsingTmp 
-                ? $"/api/upload/image/{fileName}" 
-                : $"/assets/products/{fileName}";
-            
-            _logger.LogInformation("Returning URL: {Url}", url);
-            
+            _logger.LogInformation("File saved successfully to wwwroot: {FileName}", fileName);
+            var url = $"/assets/products/{fileName}";
             return Ok(new { url, fileName });
         }
-        catch (Exception ex)
+        catch (UnauthorizedAccessException ex)
         {
-            _logger.LogError(ex, "Error uploading file {FileName} to {Path}", file.FileName, filePath);
-            return StatusCode(500, $"Error saving file: {ex.Message}");
+            _logger.LogWarning(ex, "Cannot write to wwwroot (read-only), trying /tmp");
+            
+            // Retry with /tmp
+            uploadsDir = Path.Combine("/tmp", "assets", "products");
+            Directory.CreateDirectory(uploadsDir);
+            filePath = Path.Combine(uploadsDir, fileName);
+            isUsingTmp = true;
+
+            try
+            {
+                _logger.LogInformation("Saving file to /tmp: {Path}", filePath);
+                
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream, token);
+                }
+
+                _logger.LogInformation("File saved successfully to /tmp: {FileName}", fileName);
+                
+                // Return API endpoint URL for /tmp files
+                var url = $"/api/upload/image/{fileName}";
+                return Ok(new { url, fileName });
+            }
+            catch (Exception tmpEx)
+            {
+                _logger.LogError(tmpEx, "Error saving file to /tmp: {Path}", filePath);
+                return StatusCode(500, $"Error saving file: {tmpEx.Message}");
+            }
         }
     }
 
