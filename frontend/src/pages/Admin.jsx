@@ -263,37 +263,46 @@ export default function Admin() {
             </label>
             <label>
               Password
-              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+              <div style={{ position: 'relative' }}>
                 <input
                   type={showPassword ? "text" : "password"}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  style={{ width: '100%', paddingRight: '45px' }}
+                  style={{ width: '100%', paddingRight: '70px' }}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   style={{
                     position: 'absolute',
-                    right: '12px',
-                    background: 'transparent',
-                    border: '1px solid #ccc',
-                    borderRadius: '4px',
+                    right: '8px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: '#f8f9fa',
+                    border: '1px solid #dee2e6',
+                    borderRadius: '6px',
                     cursor: 'pointer',
-                    fontSize: '12px',
-                    padding: '4px 8px',
-                    color: '#666',
-                    fontWeight: '500',
-                    transition: 'all 0.2s'
+                    fontSize: '11px',
+                    padding: '6px 12px',
+                    color: '#495057',
+                    fontWeight: '600',
+                    letterSpacing: '0.3px',
+                    transition: 'all 0.2s ease',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                    textTransform: 'uppercase'
                   }}
                   onMouseEnter={(e) => {
-                    e.target.style.background = '#f0f0f0'
-                    e.target.style.borderColor = '#999'
+                    e.target.style.background = '#e9ecef'
+                    e.target.style.borderColor = '#adb5bd'
+                    e.target.style.color = '#212529'
+                    e.target.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)'
                   }}
                   onMouseLeave={(e) => {
-                    e.target.style.background = 'transparent'
-                    e.target.style.borderColor = '#ccc'
+                    e.target.style.background = '#f8f9fa'
+                    e.target.style.borderColor = '#dee2e6'
+                    e.target.style.color = '#495057'
+                    e.target.style.boxShadow = '0 1px 2px rgba(0,0,0,0.05)'
                   }}
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
