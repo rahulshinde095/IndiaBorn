@@ -1,0 +1,123 @@
+name: Pull Request Checks
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  # Validate PR
+  pr-validation:
+    name: PR Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Check PR title
+      run: |
+        PR_TITLE="${{ github.event.pull_request.title }}"
+        if [[ ! "$PR_TITLE" =~ ^(feat|fix|docs|style|refactor|perf|test|chore|ci):.+ ]]; then
+          echo "❌ PR title must follow conventional commits format"
+          echo "Examples: feat: add login, fix: resolve auth bug"
+          exit 1
+        fi
+        
+    - name: Check for merge conflicts
+      run: |
+        git fetch origin ${{ github.base_ref }}
+        if git merge-tree $(git merge-base HEAD origin/${{ github.base_ref }}) HEAD origin/${{ github.base_ref }} | grep -q "^@@"; then
+          echo "⚠️ Merge conflicts detected"
+          exit 1
+        fi
+
+  # Backend checks
+  backend-checks:
+    name: Backend Quality Checks
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+        
+    - name: Restore
+      run: dotnet restore Indiaborn.Api/Indiaborn.Api.csproj
+      
+    - name: Build
+      run: dotnet build Indiaborn.Api/Indiaborn.Api.csproj --no-restore
+      
+    - name: Format check
+      run: dotnet format Indiaborn.Api/Indiaborn.Api.csproj --verify-no-changes --no-restore
+      continue-on-error: true
+
+  # Frontend checks
+  frontend-checks:
+    name: Frontend Quality Checks
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+        
+    - name: Install dependencies
+      run: |
+        cd frontend
+        npm ci
+        
+    - name: Check for console.logs
+      run: |
+        cd frontend/src
+        if grep -r "console.log" .; then
+          echo "⚠️ Found console.log statements in code"
+          echo "Please remove them before merging"
+        fi
+      continue-on-error: true
+        
+    - name: Build check
+      run: |
+        cd frontend
+        npm run build
+
+  # Comment on PR
+  pr-comment:
+    name: Add PR Comment
+    needs: [backend-checks, frontend-checks]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - name: Comment PR
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const backendStatus = '${{ needs.backend-checks.result }}';
+          const frontendStatus = '${{ needs.frontend-checks.result }}';
+          
+          let comment = '## PR Check Results\n\n';
+          comment += `- Backend: ${backendStatus === 'success' ? '✅' : '❌'}\n`;
+          comment += `- Frontend: ${frontendStatus === 'success' ? '✅' : '❌'}\n`;
+          
+          if (backendStatus === 'success' && frontendStatus === 'success') {
+            comment += '\n✅ All checks passed! Ready for review.';
+          } else {
+            comment += '\n⚠️ Some checks failed. Please review the logs.';
+          }
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+          });

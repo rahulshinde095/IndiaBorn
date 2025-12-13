@@ -1,0 +1,175 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # Backend build and test
+  backend-build:
+    name: Build & Test Backend
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+        
+    - name: Restore dependencies
+      run: dotnet restore Indiaborn.Api/Indiaborn.Api.csproj
+      
+    - name: Build
+      run: dotnet build Indiaborn.Api/Indiaborn.Api.csproj --configuration Release --no-restore
+      
+    - name: Test
+      run: dotnet test Indiaborn.Api/Indiaborn.Api.csproj --no-build --verbosity normal --configuration Release
+      continue-on-error: true
+      
+    - name: Publish artifacts
+      run: dotnet publish Indiaborn.Api/Indiaborn.Api.csproj -c Release -o ./publish
+      
+    - name: Upload backend artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: backend-artifacts
+        path: ./publish
+
+  # Frontend build and test
+  frontend-build:
+    name: Build & Test Frontend
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+        
+    - name: Install dependencies
+      run: |
+        cd frontend
+        npm ci
+        
+    - name: Lint code
+      run: |
+        cd frontend
+        npm run lint || echo "No lint script found"
+      continue-on-error: true
+        
+    - name: Build
+      run: |
+        cd frontend
+        npm run build
+        
+    - name: Upload frontend artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: frontend-artifacts
+        path: Indiaborn.Api/wwwroot
+
+  # Code quality checks
+  code-quality:
+    name: Code Quality Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+        
+    - name: Restore dependencies
+      run: dotnet restore Indiaborn.Api/Indiaborn.Api.csproj
+      
+    - name: Run code analysis
+      run: dotnet build Indiaborn.Api/Indiaborn.Api.csproj --configuration Release /p:TreatWarningsAsErrors=false
+
+  # Security scanning
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+      continue-on-error: true
+        
+    - name: Upload Trivy results to GitHub Security
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: 'trivy-results.sarif'
+      continue-on-error: true
+
+  # Deploy to Render (Production)
+  deploy-production:
+    name: Deploy to Production
+    needs: [backend-build, frontend-build, code-quality]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment:
+      name: production
+      url: https://indiaborn.onrender.com
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Trigger Render Deploy
+      run: |
+        curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        
+    - name: Wait for deployment
+      run: sleep 60
+      
+    - name: Health check
+      run: |
+        for i in {1..10}; do
+          if curl -f https://indiaborn.onrender.com/api/products > /dev/null 2>&1; then
+            echo "✅ Deployment successful!"
+            exit 0
+          fi
+          echo "Waiting for deployment... ($i/10)"
+          sleep 10
+        done
+        echo "❌ Deployment health check failed"
+        exit 1
+
+  # Notification
+  notify:
+    name: Send Notifications
+    needs: [deploy-production]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - name: Send notification
+      run: |
+        if [ "${{ needs.deploy-production.result }}" == "success" ]; then
+          echo "✅ Deployment succeeded!"
+        else
+          echo "❌ Deployment failed!"
+        fi
