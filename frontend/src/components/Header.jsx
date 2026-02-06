@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 import './Header.css'
@@ -17,6 +17,7 @@ export default function Header({ onSearch, onCategoryFilter, onPriceFilter }) {
 
   const handleCategoryClick = (category, subcategory = null) => {
     setShowCategoryDropdown(false)
+    setShowPriceDropdown(false)
     setExpandedSubmenu(null)
     if (onCategoryFilter) {
       onCategoryFilter(category, subcategory)
@@ -28,7 +29,8 @@ export default function Header({ onSearch, onCategoryFilter, onPriceFilter }) {
     }
   }
 
-  const handleSubmenuToggle = (submenu) => {
+  const handleSubmenuToggle = (submenu, e) => {
+    e?.stopPropagation()
     setExpandedSubmenu(expandedSubmenu === submenu ? null : submenu)
   }
 
@@ -61,6 +63,24 @@ export default function Header({ onSearch, onCategoryFilter, onPriceFilter }) {
       setPinMessage('')
     }, 3000)
   }
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      const navElement = document.querySelector('.nav__subnav')
+      if (navElement && !navElement.contains(event.target)) {
+        setShowCategoryDropdown(false)
+        setShowPriceDropdown(false)
+      }
+    }
+
+    if (showCategoryDropdown || showPriceDropdown) {
+      document.addEventListener('click', handleClickOutside)
+      return () => {
+        document.removeEventListener('click', handleClickOutside)
+      }
+    }
+  }, [showCategoryDropdown, showPriceDropdown])
 
   return (
     <>
@@ -116,7 +136,10 @@ export default function Header({ onSearch, onCategoryFilter, onPriceFilter }) {
             <button 
               type="button"
               className="category-dropdown-btn"
-              onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
+              onClick={() => {
+                setShowCategoryDropdown(!showCategoryDropdown)
+                setShowPriceDropdown(false)
+              }}
             >
               Category ▾
             </button>
@@ -136,7 +159,7 @@ export default function Header({ onSearch, onCategoryFilter, onPriceFilter }) {
                 >
                   <span 
                     className="category-submenu-label"
-                    onClick={() => handleSubmenuToggle('jewelry')}
+                    onClick={(e) => handleSubmenuToggle('jewelry', e)}
                   >
                     Jewelry ›
                   </span>
@@ -156,7 +179,7 @@ export default function Header({ onSearch, onCategoryFilter, onPriceFilter }) {
                 >
                   <span 
                     className="category-submenu-label"
-                    onClick={() => handleSubmenuToggle('sports')}
+                    onClick={(e) => handleSubmenuToggle('sports', e)}
                   >
                     Sports Equipment ›
                   </span>
@@ -177,7 +200,7 @@ export default function Header({ onSearch, onCategoryFilter, onPriceFilter }) {
                 >
                   <span 
                     className="category-submenu-label"
-                    onClick={() => handleSubmenuToggle('clothing')}
+                    onClick={(e) => handleSubmenuToggle('clothing', e)}
                   >
                     Clothing ›
                   </span>
@@ -185,7 +208,10 @@ export default function Header({ onSearch, onCategoryFilter, onPriceFilter }) {
                     <div className="category-nested-submenu">
                       <span 
                         className="category-submenu-label"
-                        onClick={() => setExpandedNestedSubmenu(expandedNestedSubmenu === 'men' ? null : 'men')}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setExpandedNestedSubmenu(expandedNestedSubmenu === 'men' ? null : 'men')
+                        }}
                         onMouseEnter={() => setExpandedNestedSubmenu('men')}
                       >
                         Men ›
@@ -202,7 +228,10 @@ export default function Header({ onSearch, onCategoryFilter, onPriceFilter }) {
                     <div className="category-nested-submenu">
                       <span 
                         className="category-submenu-label"
-                        onClick={() => setExpandedNestedSubmenu(expandedNestedSubmenu === 'women' ? null : 'women')}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setExpandedNestedSubmenu(expandedNestedSubmenu === 'women' ? null : 'women')
+                        }}
                         onMouseEnter={() => setExpandedNestedSubmenu('women')}
                       >
                         Women ›
@@ -219,7 +248,10 @@ export default function Header({ onSearch, onCategoryFilter, onPriceFilter }) {
                     <div className="category-nested-submenu">
                       <span 
                         className="category-submenu-label"
-                        onClick={() => setExpandedNestedSubmenu(expandedNestedSubmenu === 'kids' ? null : 'kids')}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setExpandedNestedSubmenu(expandedNestedSubmenu === 'kids' ? null : 'kids')
+                        }}
                         onMouseEnter={() => setExpandedNestedSubmenu('kids')}
                       >
                         Kids ›
@@ -241,7 +273,10 @@ export default function Header({ onSearch, onCategoryFilter, onPriceFilter }) {
             <button 
               type="button"
               className="category-dropdown-btn"
-              onClick={() => setShowPriceDropdown(!showPriceDropdown)}
+              onClick={() => {
+                setShowPriceDropdown(!showPriceDropdown)
+                setShowCategoryDropdown(false)
+              }}
             >
               Price ▾
             </button>
