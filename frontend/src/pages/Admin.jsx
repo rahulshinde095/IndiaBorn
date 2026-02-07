@@ -115,20 +115,17 @@ export default function Admin() {
     const file = e.target.files[0]
     if (!file) return
 
-    console.log('File selected:', file.name, 'Size:', file.size)
     setImageFile(file)
     setUploadingImage(true)
     setProductMessage(`Uploading ${file.name}...`)
 
     try {
       const result = await uploadApi.uploadImage(file, token)
-      console.log('Upload successful:', result.url)
       
       setUploadedImageUrl(result.url)
       setFormData(prev => ({ ...prev, imageUrl: result.url }))
       setProductMessage(`✓ ${file.name} uploaded successfully!`)
     } catch (error) {
-      console.error('Upload failed:', error)
       setImageFile(null)
       setUploadedImageUrl('')
       setProductMessage(`Failed to upload: ${error.message}`)
@@ -205,10 +202,6 @@ export default function Admin() {
           ? [{ url: formData.imageUrl, altText: formData.name, isPrimary: true }]
           : [],
       }
-
-      console.log('💾 Saving product with data:', data)
-      console.log('📋 Form gender value:', formData.gender)
-      console.log('📋 Data gender value:', data.gender)
 
       if (editingProduct) {
         await productApi.update(editingProduct, data, token)

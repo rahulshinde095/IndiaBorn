@@ -15,18 +15,15 @@ export function CartProvider({ children }) {
   }, [cart])
 
   const addToCart = (product) => {
-    console.log('Adding to cart:', product)
     setCart(prev => {
       const existing = prev.find(item => item.productId === product.id)
       if (existing) {
-        console.log('Product already in cart, increasing quantity')
         return prev.map(item =>
           item.productId === product.id
             ? { ...item, quantity: item.quantity + 1 }
             : item
         )
       }
-      console.log('Adding new product to cart')
       const newCart = [...prev, {
         productId: product.id,
         name: product.name,
@@ -34,7 +31,6 @@ export function CartProvider({ children }) {
         quantity: 1,
         image: product.images?.[0]?.url,
       }]
-      console.log('New cart:', newCart)
       return newCart
     })
   }

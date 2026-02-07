@@ -193,8 +193,6 @@ function TestCheckoutForm() {
       taxes: subtotal * 0.05,
     }
 
-    console.log('Test order payload:', JSON.stringify(payload, null, 2))
-
     try {
       const order = await orderApi.createTest(payload)
       const invoiceLink = order.invoiceUrl 
@@ -204,7 +202,6 @@ function TestCheckoutForm() {
       clearCart()
       e.target.reset()
     } catch (error) {
-      console.error('Test order error:', error)
       const errorMessage = error.response?.data?.message || error.message || 'Something went wrong'
       setMessage(`❌ Error: ${errorMessage}. Please check console for details.`)
     } finally {
@@ -279,7 +276,6 @@ export default function Checkout() {
   useEffect(() => {
     configApi.getStripe()
       .then(config => {
-        console.log('Stripe config loaded:', config)
         if (config.publishableKey && !config.publishableKey.includes('YOUR_')) {
           setStripePromise(loadStripe(config.publishableKey))
         } else {
@@ -288,7 +284,6 @@ export default function Checkout() {
         }
       })
       .catch(err => {
-        console.error('Failed to load Stripe config:', err)
         setError('Failed to load payment configuration')
         setStripePromise(Promise.resolve(null))
       })

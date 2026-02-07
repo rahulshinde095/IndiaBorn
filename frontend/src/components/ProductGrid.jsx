@@ -70,13 +70,6 @@ export default function ProductGrid({ categoryFilter = null, subcategoryFilter =
     const searchLower = (searchQuery || '').trim().toLowerCase()
     const range = priceRanges[priceRange]
 
-    console.log('Filtering products:', {
-      totalProducts: products.length,
-      activeCategoryFilter,
-      activeSubcategoryFilter,
-      sampleProduct: products[0]
-    })
-
     const filtered = products.filter(product => {
       const haystack = `${product.name} ${product.description}`.toLowerCase()
       const matchesSearch = !searchLower || haystack.includes(searchLower)
@@ -97,24 +90,9 @@ export default function ProductGrid({ categoryFilter = null, subcategoryFilter =
         (product.gender && product.gender.toLowerCase() === activeSubcategoryFilter.toLowerCase())
 
       const matches = matchesSearch && matchesRange && matchesCategory && matchesSubcategory
-      
-      // Debug logging for first product
-      if (product === products[0]) {
-        console.log('First product filter check:', {
-          productName: product.name,
-          productCategory: product.category,
-          productGender: product.gender,
-          productSport: product.sport,
-          matchesCategory,
-          matchesSubcategory,
-          finalMatch: matches
-        })
-      }
 
       return matches
     })
-
-    console.log('Filtered results:', filtered.length)
 
     // Add consistent review count to each product
     const filteredWithReviews = filtered.map(product => ({

@@ -35,7 +35,6 @@ public class UploadController : ControllerBase
         var fileName = $"{Guid.NewGuid()}{extension}";
         string uploadsDir;
         string filePath;
-        bool isUsingTmp = false;
 
         // Try to save to wwwroot first
         uploadsDir = Path.Combine(webRoot, "assets", "products");
@@ -63,7 +62,6 @@ public class UploadController : ControllerBase
             uploadsDir = Path.Combine("/tmp", "assets", "products");
             Directory.CreateDirectory(uploadsDir);
             filePath = Path.Combine(uploadsDir, fileName);
-            isUsingTmp = true;
 
             try
             {
