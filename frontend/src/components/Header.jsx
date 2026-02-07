@@ -136,7 +136,8 @@ export default function Header({ onSearch, onCategoryFilter, onPriceFilter }) {
             <button 
               type="button"
               className="category-dropdown-btn"
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation()
                 setShowCategoryDropdown(!showCategoryDropdown)
                 setShowPriceDropdown(false)
               }}
@@ -144,7 +145,7 @@ export default function Header({ onSearch, onCategoryFilter, onPriceFilter }) {
               Category ▾
             </button>
             {showCategoryDropdown && (
-              <div className="category-dropdown-menu">
+              <div className="category-dropdown-menu" onClick={(e) => e.stopPropagation()}>
                 <a 
                   href="#collections" 
                   onClick={() => handleCategoryClick(null)}
@@ -273,7 +274,8 @@ export default function Header({ onSearch, onCategoryFilter, onPriceFilter }) {
             <button 
               type="button"
               className="category-dropdown-btn"
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation()
                 setShowPriceDropdown(!showPriceDropdown)
                 setShowCategoryDropdown(false)
               }}
@@ -281,7 +283,7 @@ export default function Header({ onSearch, onCategoryFilter, onPriceFilter }) {
               Price ▾
             </button>
             {showPriceDropdown && (
-              <div className="category-dropdown-menu">
+              <div className="category-dropdown-menu" onClick={(e) => e.stopPropagation()}>
                 <a href="#collections" onClick={() => {
                   setSelectedPrice('all');
                   setShowPriceDropdown(false);
