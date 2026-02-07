@@ -9,15 +9,13 @@ export default function Header({ onSearch, onCategoryFilter, onPriceFilter }) {
   const [showPinModal, setShowPinModal] = useState(false)
   const [pinCode, setPinCode] = useState('')
   const [pinMessage, setPinMessage] = useState('')
-  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false)
-  const [showPriceDropdown, setShowPriceDropdown] = useState(false)
+  const [openDropdown, setOpenDropdown] = useState(null) // 'category', 'price', or null
   const [selectedPrice, setSelectedPrice] = useState('all')
   const [expandedSubmenu, setExpandedSubmenu] = useState(null)
   const [expandedNestedSubmenu, setExpandedNestedSubmenu] = useState(null)
 
   const handleCategoryClick = (category, subcategory = null) => {
-    setShowCategoryDropdown(false)
-    setShowPriceDropdown(false)
+    setOpenDropdown(null)
     setExpandedSubmenu(null)
     if (onCategoryFilter) {
       onCategoryFilter(category, subcategory)
@@ -69,18 +67,17 @@ export default function Header({ onSearch, onCategoryFilter, onPriceFilter }) {
     const handleClickOutside = (event) => {
       const navElement = document.querySelector('.nav__subnav')
       if (navElement && !navElement.contains(event.target)) {
-        setShowCategoryDropdown(false)
-        setShowPriceDropdown(false)
+        setOpenDropdown(null)
       }
     }
 
-    if (showCategoryDropdown || showPriceDropdown) {
+    if (openDropdown) {
       document.addEventListener('click', handleClickOutside)
       return () => {
         document.removeEventListener('click', handleClickOutside)
       }
     }
-  }, [showCategoryDropdown, showPriceDropdown])
+  }, [openDropdown])
 
   return (
     <>
@@ -138,13 +135,12 @@ export default function Header({ onSearch, onCategoryFilter, onPriceFilter }) {
               className="category-dropdown-btn"
               onClick={(e) => {
                 e.stopPropagation()
-                setShowCategoryDropdown(!showCategoryDropdown)
-                setShowPriceDropdown(false)
+                setOpenDropdown(openDropdown === 'category' ? null : 'category')
               }}
             >
               Category ▾
             </button>
-            {showCategoryDropdown && (
+            {openDropdown === 'category' && (
               <div className="category-dropdown-menu" onClick={(e) => e.stopPropagation()}>
                 <a 
                   href="#collections" 
@@ -276,13 +272,12 @@ export default function Header({ onSearch, onCategoryFilter, onPriceFilter }) {
               className="category-dropdown-btn"
               onClick={(e) => {
                 e.stopPropagation()
-                setShowPriceDropdown(!showPriceDropdown)
-                setShowCategoryDropdown(false)
+                setOpenDropdown(openDropdown === 'price' ? null : 'price')
               }}
             >
               Price ▾
             </button>
-            {showPriceDropdown && (
+            {openDropdown === 'price' && (
               <div className="category-dropdown-menu" onClick={(e) => e.stopPropagation()}>
                 <a href="#collections" onClick={() => {
                   setSelectedPrice('all');
